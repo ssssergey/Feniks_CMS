@@ -1,0 +1,38 @@
+{% extends "catalog.html" %}
+{% load catalog_filters %}
+{% block content %}
+    <table class="table table-striped" id="receipt">
+        <caption>
+            Подробнее о Заказе # {{ order.id }}
+        </caption>
+        <thead>
+        <tr>
+            <th scope="col">Название</th>
+            <th scope="col">Цена</th>
+            <th scope="col">Количество</th>
+            <th class="right" scope="col">Сумма</th>
+        </tr>
+        </thead>
+        <tfoot>
+        <tr>
+            <td colspan="4" class="right" style="height:30px;">
+                Общая сумма: {{ order.total }}
+            </td>
+        </tr>
+        </tfoot>
+        <tbody>
+        {% for item in order_items %}
+            <tr>
+                <td>
+                    <a href="{{ item.get_absolute_url }}">
+                        {{ item.name }}
+                    </a>
+                </td>
+                <td>{{ item.price }}</td>
+                <td>{{ item.quantity }}</td>
+                <td class="right">{{ item.total }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+
+{% block content %}
+    {% if request.user.fullname %}
+        {{ request.user.fullname }}
+    {% endif %}
+
+    <a href="{% url 'product_list' %}" class="btn btn-lg btn-primary">Новый заказ</a>
+
+{% endblock %}
