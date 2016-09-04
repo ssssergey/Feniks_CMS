@@ -21,5 +21,8 @@ urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^accounts/', include('accounts.urls')),
     url(r'^$', index, name='home'),
+    url(r'^create_order$', create_order, name='create_order'),
     url(r'^product_list$', product_list, name='product_list'),
+    url(r'^product_add$', product_add, name='product_add'),
+    url(r'^add_to_order$', add_to_order, name='add_to_order'),
 ]

@@ -2,42 +2,27 @@
 
 {% block content %}
     <div class="container">
-        <div class="row" id="current_order_list">
-            <div class="col-sm-12">
-                {% for oi in order_list %}
-                    {{ oi }}
-                {% endfor %}
+        <div class="row" id="order_header">
+            <div class="col-sm-12 text-center">
+                <h1><small>Текущий менеджер: </small><span>{{ request.user }}</span></h1>
             </div>
         </div>
 
         <div class="row">
-            <div class="col-sm-12">
-                <table class="table" id="product_list">
+            <div class="col-sm-6">
+                <h2>Номенклатура товаров</h2>
+                <table class="table">
+                    <thead>
                     <tr>
-                        <th>#</th>
                         <th>Товар</th>
-                        <th>Количество</th>
+                        <th>Цена и количество</th>
                     </tr>
+                    </thead>
+                    <tbody id="product_list">
                     {% for product in product_list %}
-                        <tr>
-                            <td>{{ forloop.counter }}</td>
-                            <td>{{ product }}</td>
-                            <td>
-                                <form>
-                                    <div class="row">
-                                        <div class="col-sm-2">
-                                            <input type="number" name="quantity" value="1"
-                                                   size="2" class="quantity form-control" maxlength="5"/>
-                                        </div>
-                                        <div class="col-sm-10">
-                                            <a type="submit" href="#">Добавить в заказ</a>
-                                        </div>
-                                    </div>
-                                </form>
-                            </td>
-
-                        </tr>
+                        {% include 'snippets/product_table_row.html' %}
                     {% endfor %}
+                    </tbody>
                 </table>
 
 
@@ -46,12 +31,38 @@
                     <form class="form-group">
                         {% csrf_token %}
                         <div id="product_errors"></div>
-                        {{ product_form }}
-                        {#                <input type="hidden" id="id_slug" value="{{ p.slug }}"/>#}
-                        <input class="btn btn-primary" type="submit" id="submit_review" value="Добавить"/>
+                        {{ product_form.as_p }}
+                        <input class="btn btn-primary" type="submit" id="submit_product" value="Добавить"/>
+                    </form>
+                </div>
+            </div>
+            <div class="col-sm-6">
+                <div id="order_items">
+                    <h2>Текущий заказ №<span id="order_id">{{ order_id }}</span></h2>
+                    <table class="table">
+                        <thead>
+                        <tr>
+                            <th>Товар</th>
+                            <th>Цена</th>
+                            <th>Количество</th>
+                        </tr>
+                        </thead>
+                        <tbody id="order_items_list">
+                        {% if order_items %}
+                            {% for oi in order_items %}
+                                {% include 'snippets/order_item_table_row.html' with orderitem=oi %}
+                            {% endfor %}
+                        {% endif %}
+                        </tbody>
+                    </table>
+                    <form method="post" action="">
+                        {% csrf_token %}
+                        {{ order_form.as_p }}
+                        <input type="hidden" name="order_id" value="{{ order_id }}" />
+                        <button type="submit" class="btn btn-primary" name="yes">Оформить заказ</button>
+                        <button type="submit" class="btn btn-danger" name="no">Удалить</button>
                     </form>
                 </div>
             </div>
         </div>
-    </div>
 {% endblock %}

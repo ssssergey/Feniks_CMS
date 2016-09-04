@@ -1,10 +1,16 @@
 {% extends "base.html" %}
 
 {% block content %}
-    {% if request.user.fullname %}
-        {{ request.user.fullname }}
-    {% endif %}
-
-    <a href="{% url 'product_list' %}" class="btn btn-lg btn-primary">Новый заказ</a>
-
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <h1>
+                    {% if request.user %}
+                        {{ request.user }}
+                    {% endif %}
+                </h1>
+                <a href="{% url 'create_order' %}" class="btn btn-lg btn-primary">Новый заказ</a>
+            </div>
+        </div>
+    </div>
 {% endblock %}

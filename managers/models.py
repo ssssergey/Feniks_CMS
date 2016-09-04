@@ -42,11 +42,11 @@ class Product(models.Model):
     name = models.CharField(u'Название товара', max_length=255)
     slug = models.SlugField(max_length=255, unique=True,
                             help_text='Unique value for product page URL, created from name.')
-    categories = models.ForeignKey(Category, verbose_name=u'Категории')
+    categories = models.ForeignKey(Category, verbose_name=u'Категория')
     min_price = models.IntegerField(u'Мин. цена', blank=True, null=True)
     max_price = models.IntegerField(u'Макс. цена', blank=True, null=True)
     is_active = models.BooleanField(u'Активно', default=True)
-    description = models.TextField(u'Описание', blank=True, null=True)
+    description = models.TextField(u'Описание', blank=True, null=True, help_text=u'Введите любое произвольное описание, если необходимо.')
     created_at = models.DateTimeField(u'Создан', auto_now_add=True)
     updated_at = models.DateTimeField(u'Изменен', auto_now=True)
     objects = models.Manager()
@@ -54,7 +54,7 @@ class Product(models.Model):
 
     class Meta:
         db_table = 'products'
-        ordering = ['-name']
+        ordering = ['name']
         verbose_name = u'Товар'
         verbose_name_plural = u'Товары'
 
@@ -72,18 +72,19 @@ class ActiveOrderManager(models.Manager):
 
 class Order(models.Model):
     # each individual status
-    ORDER_STATUSES = (
-        ('not_paid', u'Неоплачен'), ('advance_money', u'Получен задаток'), ('full_paid', u'Оплачен полностью'),
-        ('canceled', u'Отменен'), ('completed', u'Завершен'))
+    # ORDER_STATUSES = (
+    #     ('not_paid', u'Неоплачен'), ('advance_money', u'Получен задаток'), ('full_paid', u'Оплачен полностью'),
+    #     ('canceled', u'Отменен'), ('completed', u'Завершен'))
     created = models.DateTimeField(u'Создан', auto_now_add=True)
     last_updated = models.DateTimeField(u'Изменен', auto_now=True)
-    sale_date = models.DateField(u'Дата продажи')
+    sale_date = models.DateField(u'Дата продажи', null=True)
     advance_money_date = models.DateField(u'Дата получения задатка', blank=True, null=True)
     realization_date = models.DateField(u'Дата реализации', blank=True, null=True)
     advance_money = models.IntegerField(u'Сумма задатка', blank=True, null=True)
-    status = models.CharField(u'Статус', max_length=50, choices=ORDER_STATUSES)
+    # status = models.CharField(u'Статус', max_length=150, choices=ORDER_STATUSES)
     saler = models.ForeignKey(settings.AUTH_USER_MODEL, verbose_name=u'Менеджер', blank=True, null=True)
     is_active = models.BooleanField(u'Активно', default=False)
+    objects = models.Manager()
     active = ActiveOrderManager()
 
     class Meta:
@@ -121,6 +122,7 @@ class OrderItem(models.Model):
     price = models.IntegerField(u'Цена продажи')
     order = models.ForeignKey(Order, verbose_name=u'Заказ')
     is_active = models.BooleanField(u'Активно', default=False)
+    objects = models.Manager()
     active = ActiveOrderItemManager()
 
     class Meta:

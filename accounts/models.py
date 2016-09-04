@@ -17,4 +17,4 @@ class UserProfile(AbstractUser):
         return '{} {} {}'.format(self.last_name, self.first_name, self.patronymic)
 
     def __unicode__(self):
-        return self.username
+        return self.fullname

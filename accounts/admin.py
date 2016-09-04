@@ -12,3 +12,8 @@ class UserAdmin(UserAdmin):
     list_filter = ('last_name', 'first_name', 'patronymic', 'username',)
     list_per_page = 20
     ordering = ['last_name']
+    fieldsets = (
+        (None, {'fields': ('password', 'username', 'last_name', 'first_name', 'patronymic')}),
+        (u'Разрешения', {'fields': ('is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions')}),
+        (u'Даты', {'fields': ('last_login', 'date_joined')}),
+    )
