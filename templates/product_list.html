@@ -1,49 +1,48 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <div class="container">
-        <div class="row" id="order_header">
-            <div class="col-sm-12 text-center">
-                <h1><small>Текущий менеджер: </small><span>{{ request.user }}</span></h1>
+    <div class="row">
+        <div class="col-sm-6">
+            <h2>Номенклатура товаров</h2>
+            <table class="table">
+                <thead>
+                <tr>
+                    <th>Товар</th>
+                    <th>Цена и количество</th>
+                </tr>
+                </thead>
+                <tbody id="product_list">
+                {% for product in product_list %}
+                    {% include 'snippets/product_table_row.html' %}
+                {% endfor %}
+                </tbody>
+            </table>
+
+
+            <a id="add_product">Добавить товар</a>
+            <div id="product_form">
+                <form class="form-group">
+                    {% csrf_token %}
+                    <div id="product_errors"></div>
+                    {{ product_form.as_p }}
+                    <input class="btn btn-primary" type="submit" id="submit_product" value="Добавить"/>
+                </form>
             </div>
         </div>
+        <div class="col-sm-6">
+            <div id="order_items">
+                <h2>Текущий договор<span id="order_id" hidden>{{ order_id }}</span></h2>
+                <form method="post" action="">
+                    {% csrf_token %}
+                    {{ order_form.as_p }}
+                    <input type="hidden" name="order_id" value="{{ order_id }}"/>
 
-        <div class="row">
-            <div class="col-sm-6">
-                <h2>Номенклатура товаров</h2>
-                <table class="table">
-                    <thead>
-                    <tr>
-                        <th>Товар</th>
-                        <th>Цена и количество</th>
-                    </tr>
-                    </thead>
-                    <tbody id="product_list">
-                    {% for product in product_list %}
-                        {% include 'snippets/product_table_row.html' %}
-                    {% endfor %}
-                    </tbody>
-                </table>
-
-
-                <a id="add_product">Добавить товар</a>
-                <div id="product_form">
-                    <form class="form-group">
-                        {% csrf_token %}
-                        <div id="product_errors"></div>
-                        {{ product_form.as_p }}
-                        <input class="btn btn-primary" type="submit" id="submit_product" value="Добавить"/>
-                    </form>
-                </div>
-            </div>
-            <div class="col-sm-6">
-                <div id="order_items">
-                    <h2>Текущий заказ №<span id="order_id">{{ order_id }}</span></h2>
                     <table class="table">
                         <thead>
                         <tr>
                             <th>Товар</th>
                             <th>Цена</th>
+                            <th>Скидка</th>
                             <th>Количество</th>
                         </tr>
                         </thead>
@@ -55,14 +54,9 @@
                         {% endif %}
                         </tbody>
                     </table>
-                    <form method="post" action="">
-                        {% csrf_token %}
-                        {{ order_form.as_p }}
-                        <input type="hidden" name="order_id" value="{{ order_id }}" />
-                        <button type="submit" class="btn btn-primary" name="yes">Оформить заказ</button>
-                        <button type="submit" class="btn btn-danger" name="no">Удалить</button>
-                    </form>
-                </div>
+                    <button type="submit" class="btn btn-primary" name="yes">Далее</button>
+                    <button type="submit" class="btn btn-danger" name="no">Удалить</button>
+                </form>
             </div>
         </div>
     </div>

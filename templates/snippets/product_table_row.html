@@ -7,14 +7,18 @@
                 <div class="col-sm-6">
                     <label for="price">Цена</label>
                     <input type="number" name="price"
-                                           size="6" class="price form-control" maxlength="8" required/>
+                           size="6" class="price form-control" maxlength="8" required/>
+                    <label for="price">Скидка</label>
+                    <input type="number" name="discount"
+                           size="6" class="discount form-control" maxlength="8"/>
                     <label for="quantity">Количество</label>
                     <input type="number" name="quantity" value="1"
                            size="2" class="quantity form-control" maxlength="5" required/>
-                    <input type="hidden" name="product_id" class="product_id" value="{{ product.id }}" />
+                    <input type="hidden" name="product_id" class="product_id" value="{{ product.id }}"/>
                 </div>
                 <div class="col-sm-6">
-                    <a class="submit_add_to_order" type="submit" href="#">Добавить в заказ <i class="fa fa-arrow-right fa-lg" aria-hidden="true"></i></a>
+                    <a class="submit_add_to_order" type="submit" href="#">Добавить в заказ <i
+                            class="fa fa-arrow-right fa-lg" aria-hidden="true"></i></a>
                 </div>
             </div>
         </form>

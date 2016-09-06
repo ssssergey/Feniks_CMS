@@ -1,20 +1,8 @@
-"""Feniks_CMS URL Configuration
+# -*- coding: utf-8 -*-
 
-The `urlpatterns` list routes URLs to views. For more information please see:
-    https://docs.djangoproject.com/en/1.9/topics/http/urls/
-Examples:
-Function views
-    1. Add an import:  from my_app import views
-    2. Add a URL to urlpatterns:  url(r'^$', views.home, name='home')
-Class-based views
-    1. Add an import:  from other_app.views import Home
-    2. Add a URL to urlpatterns:  url(r'^$', Home.as_view(), name='home')
-Including another URLconf
-    1. Import the include() function: from django.conf.urls import url, include
-    2. Add a URL to urlpatterns:  url(r'^blog/', include('blog.urls'))
-"""
 from django.conf.urls import url, include
 from django.contrib import admin
+
 from managers.views import *
 
 urlpatterns = [
@@ -25,4 +13,11 @@ urlpatterns = [
     url(r'^product_list$', product_list, name='product_list'),
     url(r'^product_add$', product_add, name='product_add'),
     url(r'^add_to_order$', add_to_order, name='add_to_order'),
+    url(r'^orders$', orders, name='orders'),
+    url(r'^order/(?P<order_id>[0-9]+)$', order_detail, name='order_detail'),
+    # url(r'^order/(?P<order_id>[0-9]+)/advance_money$', advance_money, name='advance_money'),
+    # url(r'^order/(?P<order_id>[0-9]+)/order_items$', order_items, name='order_items'),
+    # url(r'^order/(?P<order_id>[0-9]+)/order_items/(?P<oi_id>[0-9]+)$', order_item_detail, name='order_item_detail'),
 ]
+
+admin.site.site_header = u'"Феникс" - зарплаты'

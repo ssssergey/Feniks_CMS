@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
+
 from django.core.urlresolvers import reverse
 from django.db import models
-from django.utils import timezone
+
 from Feniks_CMS import settings
+
 
 ############### Категории ###############
 class ActiveCategoryManager(models.Manager):
@@ -30,6 +32,8 @@ class Category(models.Model):
 
     def get_absolute_url(self):
         return reverse('category', args=(self.slug,))
+
+
 ##############################################
 
 ################### Товары ####################
@@ -39,14 +43,15 @@ class ActiveProductManager(models.Manager):
 
 
 class Product(models.Model):
-    name = models.CharField(u'Название товара', max_length=255)
+    name = models.CharField(u'Название товара', max_length=255, unique=True)
     slug = models.SlugField(max_length=255, unique=True,
                             help_text='Unique value for product page URL, created from name.')
     categories = models.ForeignKey(Category, verbose_name=u'Категория')
     min_price = models.IntegerField(u'Мин. цена', blank=True, null=True)
     max_price = models.IntegerField(u'Макс. цена', blank=True, null=True)
     is_active = models.BooleanField(u'Активно', default=True)
-    description = models.TextField(u'Описание', blank=True, null=True, help_text=u'Введите любое произвольное описание, если необходимо.')
+    description = models.TextField(u'Описание', blank=True, null=True,
+                                   help_text=u'Введите любое произвольное описание, если необходимо.')
     created_at = models.DateTimeField(u'Создан', auto_now_add=True)
     updated_at = models.DateTimeField(u'Изменен', auto_now=True)
     objects = models.Manager()
@@ -63,36 +68,43 @@ class Product(models.Model):
 
     def get_absolute_url(self):
         return reverse('product', args=(self.slug,))
+
+
 ####################################################
+
+
 
 ################## Заказы ##################
 class ActiveOrderManager(models.Manager):
     def get_query_set(self):
         return super(ActiveOrderManager, self).get_query_set().filter(is_active=True)
 
+
 class Order(models.Model):
-    # each individual status
-    # ORDER_STATUSES = (
-    #     ('not_paid', u'Неоплачен'), ('advance_money', u'Получен задаток'), ('full_paid', u'Оплачен полностью'),
-    #     ('canceled', u'Отменен'), ('completed', u'Завершен'))
     created = models.DateTimeField(u'Создан', auto_now_add=True)
     last_updated = models.DateTimeField(u'Изменен', auto_now=True)
+    # Продажа
+    order_num = models.IntegerField(u'Номер договора', null=True, unique=True)
+    saler = models.ForeignKey(settings.AUTH_USER_MODEL, verbose_name=u'Менеджер', null=True)
     sale_date = models.DateField(u'Дата продажи', null=True)
-    advance_money_date = models.DateField(u'Дата получения задатка', blank=True, null=True)
-    realization_date = models.DateField(u'Дата реализации', blank=True, null=True)
-    advance_money = models.IntegerField(u'Сумма задатка', blank=True, null=True)
-    # status = models.CharField(u'Статус', max_length=150, choices=ORDER_STATUSES)
-    saler = models.ForeignKey(settings.AUTH_USER_MODEL, verbose_name=u'Менеджер', blank=True, null=True)
+    # Полная сумма
+    kredit = models.BooleanField(u'Кредит', default=False)
+    full_money_date = models.DateField(u'Дата получения всей суммы', blank=True, null=True)
+    # Администратор
+    admin_check = models.BooleanField(u'Проверено админом', default=False)
     is_active = models.BooleanField(u'Активно', default=False)
+    # Бухгалтер
+    accountant_check = models.BooleanField(u'Проверено бухгалтером', default=False)
     objects = models.Manager()
     active = ActiveOrderManager()
 
     class Meta:
-        verbose_name = u'Заказ'
-        verbose_name_plural = u'Заказы'
+        ordering = ['sale_date']
+        verbose_name = u'Договор'
+        verbose_name_plural = u'Договоры'
 
     def __unicode__(self):
-        return u'Заказ #{}'.format(self.id)
+        return u'Договор #{}'.format(self.order_num)
 
     @property
     def quantity(self):
@@ -107,27 +119,107 @@ class Order(models.Model):
             total += item.total
         return total
 
+    @property
+    def total_advance_money(self):
+        total = 0
+        amoney = AdvanceMoney.objects.filter(order=self)
+        for item in amoney:
+            total += item.advance_money
+        return total
+
+    @property
+    def fullpayed(self):
+        if self.full_money_date:
+            return True
+        else:
+            return False
+
     def get_absolute_url(self):
         return reverse('order_details', args=(self.id,))
+
+
 ################################################
 
-################## Позиция заказа ###################
+################ Задаток #################
+class ActiveAdvanceMoneyManager(models.Manager):
+    def get_query_set(self):
+        return super(ActiveAdvanceMoneyManager, self).get_query_set().filter(is_active=True)
+
+
+class AdvanceMoney(models.Model):
+    order = models.ForeignKey(Order, verbose_name=u'Договор')
+    date = models.DateField(u'Дата получения задатка', null=True)
+    advance_money = models.IntegerField(u'Сумма задатка', blank=True, null=True)
+    is_active = models.BooleanField(u'Активно', default=True)
+    objects = models.Manager()
+    active = ActiveAdvanceMoneyManager()
+
+    class Meta:
+        ordering = ['date']
+        verbose_name = u'Задаток'
+        verbose_name_plural = u'Задатки'
+
+    def __unicode__(self):
+        return u'Задаток #{}'.format(self.id)
+
+
+##################################
+
+
+################ Доставка #################
+class ActiveDeliveryManager(models.Manager):
+    def get_query_set(self):
+        return super(ActiveDeliveryManager, self).get_query_set().filter(is_active=True)
+
+
+class Delivery(models.Model):
+    date = models.DateField(u'Дата доставки', null=True)
+    lifter = models.ManyToManyField(settings.AUTH_USER_MODEL, verbose_name=u'Грузчик', related_name='lifter_user')
+    driver = models.ForeignKey(settings.AUTH_USER_MODEL, verbose_name=u'Водитель', related_name='driver_user',
+                               null=True)
+    place = models.CharField(u'Расстояние', max_length=150, choices=((u'город', u'город'), (u'регион', u'регион')))
+    stores = models.IntegerField(u'Этажи', null=True)
+    assembly = models.IntegerField(u'Стоимость сборки', null=True)
+    is_active = models.BooleanField(u'Активно', default=True)
+    objects = models.Manager()
+    active = ActiveDeliveryManager()
+
+    class Meta:
+        verbose_name = u'Доставка'
+        verbose_name_plural = u'Доставки'
+
+    def __unicode__(self):
+        return u'Доставка #{}'.format(self.id)
+
+
+##################################
+
+################## Позиция договора ###################
 class ActiveOrderItemManager(models.Manager):
     def get_query_set(self):
         return super(ActiveOrderItemManager, self).get_query_set().filter(is_active=True)
 
+
 class OrderItem(models.Model):
+    order = models.ForeignKey(Order, verbose_name=u'Договор')
     product = models.ForeignKey(Product, verbose_name=u'Товар')
     quantity = models.IntegerField(u'Количество', default=1)
     price = models.IntegerField(u'Цена продажи')
-    order = models.ForeignKey(Order, verbose_name=u'Заказ')
+    discount = models.IntegerField(u'Скидка', blank=True, null=True)
+    present = models.BooleanField(u'В наличии', default=True)
+    # Заказ у поставщика
+    supplier_invoice_date = models.DateField(u'Дата заказа у поставщика', blank=True, null=True)
+    supplier_delivered_date = models.DateField(u'Дата получения от поставщика', blank=True, null=True)
+    # Отгрузка
+    delivery = models.ForeignKey(Delivery, verbose_name=u'Доставка', blank=True, null=True)
+
     is_active = models.BooleanField(u'Активно', default=False)
     objects = models.Manager()
     active = ActiveOrderItemManager()
 
     class Meta:
-        verbose_name = u'Позиция заказа'
-        verbose_name_plural = u'Позиции заказа'
+        verbose_name = u'Позиция договора'
+        verbose_name_plural = u'Позиции договора'
 
     @property
     def total(self):
@@ -137,11 +229,10 @@ class OrderItem(models.Model):
     def name(self):
         return self.product.name
 
-
     def __unicode__(self):
-        result = self.product.name
-        return u'Товар заказа: {}'.format(result)
+        return u'Позиция договора: {}'.format(self.product.name)
 
     def get_absolute_url(self):
         return self.product.get_absolute_url()
+
 ################################################################
