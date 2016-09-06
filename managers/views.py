@@ -1,16 +1,16 @@
 # -*- coding: utf-8 -*-
 import json
-from uuslug import slugify
 
-from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
+from django.core.urlresolvers import reverse
+from django.http import HttpResponse, HttpResponseRedirect
+from django.shortcuts import render, get_object_or_404
 from django.template.loader import render_to_string
 from django.views.generic import ListView, CreateView
-from django.contrib.auth.decorators import login_required
-from django.http import HttpResponse, HttpResponseRedirect
-from django.core.urlresolvers import reverse
+from uuslug import slugify
 
-from .models import Order, Product, Category, OrderItem
 from .forms import ProductForm, OrderForm
+from .models import Order, Product, Category, OrderItem
 
 
 @login_required
@@ -43,7 +43,7 @@ def product_list(request):
                         oi.is_active = True
                         oi.save()
                     del request.session['order_id']
-                    return HttpResponseRedirect(reverse('home'))
+                    return HttpResponseRedirect(reverse('order_detail', args=[order_id, ]))
 
             elif 'no' in request.POST:
                 order_instance.delete()
@@ -69,7 +69,7 @@ def product_list(request):
 
 def product_add(request):
     form = ProductForm(request.POST)
-    print (form)
+    print (u'Создание товара!!!!!!!!!!!!!!!!', form)
     if form.is_valid():
         new_product = form.save(commit=False)
         cat_id = request.POST.get('categories')
@@ -89,6 +89,7 @@ def add_to_order(request):
     order_id = request.GET.get('order_id')
     product_id = request.GET.get('product_id')
     price = request.GET.get('price')
+    discount = request.GET.get('discount')
     quantity = request.GET.get('quantity')
 
     order = Order.objects.get(id=int(order_id))
@@ -98,6 +99,8 @@ def add_to_order(request):
     order_item.order = order
     order_item.product = product
     order_item.price = int(price)
+    if discount:
+        order_item.discount = int(discount)
     order_item.quantity = int(quantity)
     order_item.save()
 
@@ -107,10 +110,18 @@ def add_to_order(request):
     return HttpResponse(response, content_type='application/javascript; charset=utf-8')
 
 
+@login_required
+def orders(request):
+    orders = Order.active.all()
+    page_title = u'Все договоры'
+    return render(request, "orders.html", locals())
 
 
-
-
+@login_required
+def order_detail(request, order_id):
+    order = get_object_or_404(Order, id=order_id)
+    page_title = u'Договор №{}'.format(order.order_num)
+    return render(request, "order_detail.html", locals())
 
 
 

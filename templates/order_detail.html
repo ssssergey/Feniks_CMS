@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-sm-3">
+            <h2 align="center">Изменить</h2>
+            <div class="btns">
+                <a class="btn btn-lg btn-default" href="#">Задатки</a>
+                <a class="btn btn-lg btn-default" href="#">Позиции договора и Доставки</a>
+            </div>
+        </div>
+        <div class="col-sm-9">
+            <div class="order_description">
+                <h2>Договор №{{ order.order_num }}</h2>
+                <p>Продавец: {{ order.saler.fullname }}</p>
+                <p>Дата продажи: {{ order.sale_date }}</p>
+                <p>Сумма продажи: {{ order.total }} рублей</p>
+                {% if order.kredit %}
+                    <p>Оплачено кредитом</p>
+                {% endif %}
+                {% if order.full_money_date %}
+                    <p>Оплачено полностью: {{ order.full_money_date }}</p>
+                {% else %}
+                    <p>Полностью не оплачено</p>
+                {% endif %}
+                {% if order.admin_check %}
+                    <p>Администратор проверил</p>
+                {% else %}
+                    <p>Администратор не проверил</p>
+                {% endif %}
+                {% if order.accountant_check %}
+                    <p>Бухгалтер проверил</p>
+                {% else %}
+                    <p>Бухгалтер не проверил</p>
+                {% endif %}
+                {% if order.advancemoney_set %}
+                    <h3>Задатки: {{ order.total_advance_money }} рублей</h3>
+                    <table class="table">
+                        <thead>
+                        <tr>
+                            <th>№</th>
+                            <th>Дата получения задатка</th>
+                            <th>Сумма задатка</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for amoney in order.advancemoney_set.all %}
+                            <tr>
+                                <td>{{ forloop.counter }}</td>
+                                <td>{{ amoney.date }}</td>
+                                <td>{{ amoney.advance_money }} рублей</td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                {% endif %}
+
+                {% if order.orderitem_set %}
+                    <h3>Позиции договора:</h3>
+                    <table class="table">
+                        <thead>
+                        <tr>
+                            <th>№</th>
+                            <th>Товар</th>
+                            <th>Цена</th>
+                            <th>Скидка</th>
+                            <th>Количество</th>
+                            <th>Сумма</th>
+                            <th></th>
+                        </tr>
+                        </thead>
+                        <tbody id="order_items_list">
+                        {% for oi in order.orderitem_set.all %}
+                            <tr>
+                                <td>{{ forloop.counter }}</td>
+                                {% include 'snippets/order_item_table_row_full.html' with orderitem=oi %}
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+{% endblock %}

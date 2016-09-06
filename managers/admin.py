@@ -1,6 +1,8 @@
 from django.contrib import admin
-from .models import Category, Product, Order, OrderItem
-from django.contrib.auth.admin import UserAdmin
+
+from .models import Category, Product, Order, OrderItem, Delivery, AdvanceMoney
+
+
 # Register your models here.
 
 class OrderItemInline(admin.TabularInline):
@@ -22,3 +24,5 @@ admin.site.register(Category, CategoryAdmin)
 admin.site.register(Product, ProductAdmin)
 admin.site.register(Order, OrderAdmin)
 admin.site.register(OrderItem)
+admin.site.register(Delivery)
+admin.site.register(AdvanceMoney)

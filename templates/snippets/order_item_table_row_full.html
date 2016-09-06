@@ -1,0 +1,16 @@
+<td>{{ orderitem.product.name }}</td>
+<td>{{ orderitem.price }}</td>
+<td>
+    {% if orderitem.discount %}
+        {{ orderitem.discount }}
+    {% else %}
+        0
+    {% endif %}
+</td>
+<td>{{ orderitem.quantity }}</td>
+<td>{{ orderitem.total }}</td>
+{% if orderitem.present %}
+    <td>В наличии</td>
+{% else %}
+    <td>На заказ</td>
+{% endif %}

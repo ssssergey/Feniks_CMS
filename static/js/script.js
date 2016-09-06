@@ -3,10 +3,10 @@ $(document).ready(function () {
     $("#add_product").addClass('visible');
     $("#add_product").click(slideToggleForm);
     $("#submit_product").click(addProduct);
-    $(".submit_add_to_order").click(addToOrder);
+    $("#product_list").on('click', '.submit_add_to_order', addToOrder);
+    // $(".submit_add_to_order").click(addToOrder);
 
 });
-
 
 
 function slideToggleForm() {
@@ -32,11 +32,10 @@ function addProduct(e) {
         data: data,
         dataType: "json",
         success: function (response) {
-            $("#product_errors").empty();
+            $(".product_errors").empty();
             if (response.success == "True") {
-                console.log(response.html);
+                // console.log(response.html);
                 // $("#submit_product").attr('disabled', 'disabled');
-                $("#no_reviews").empty();
                 $("#product_list").append(response.html).slideDown();
                 $("#product_list").children(":last").addClass('newly_added_product');
                 $("#product_form").slideToggle();
@@ -46,7 +45,7 @@ function addProduct(e) {
                 $("#id_description").val('');
             }
             else {
-                $("#review_errors").append(response.html);
+                $(this).closest(".product_errors").append(response.html);
             }
         }
     });
@@ -54,11 +53,13 @@ function addProduct(e) {
 
 function addToOrder(e) {
     e.preventDefault();
+    console.log('Click!');
     var form_tag = $(this).closest('form');
 
     var order_id = $("#order_id").text();
     var product_id = form_tag.find(".product_id").val();
     var price = form_tag.find(".price").val();
+    var discount = form_tag.find(".discount").val();
     var quantity = form_tag.find(".quantity").val();
     console.log(order_id, product_id, price, quantity);
 
@@ -71,6 +72,7 @@ function addToOrder(e) {
         order_id: order_id,
         product_id: product_id,
         price: price,
+        discount: discount,
         quantity: quantity,
         csrfmiddlewaretoken: document.getElementsByName('csrfmiddlewaretoken')[0].value
     };
@@ -83,7 +85,7 @@ function addToOrder(e) {
         data: data,
         dataType: "json",
         success: function (response) {
-            $("#product_errors").empty();
+            $(".product_errors").empty();
             if (response.success == "True") {
                 console.log(response.html);
                 $("#order_items_list").append(response.html).slideDown();
@@ -100,4 +102,18 @@ $('.datepicker').datepicker({
     language: "ru",
     daysOfWeekHighlighted: "0,6",
     todayHighlight: true
+});
+
+// from my_account
+$(function () {
+    $('[data-toggle="popover"]').popover();
+    $('[data-toggle="popover-percent"]').popover({
+        html: true,
+        content: function () {
+            return $("#popover-2-content").html();
+        },
+        title: function () {
+            return $("#popover-2-title").html();
+        }
+    })
 });
