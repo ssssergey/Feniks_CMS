@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-sm-6">
+            <h2>Номенклатура товаров</h2>
+            <table class="table">
+                <thead>
+                <tr>
+                    <th>Товар</th>
+                    <th>Цена и количество</th>
+                </tr>
+                </thead>
+                <tbody id="product_list">
+                {% for product in product_list %}
+                    {% include 'snippets/product_table_row.html' %}
+                {% endfor %}
+                </tbody>
+            </table>
+            <div class="product_errors"></div>
+
+            <a class="btn btn-warning" id="add_product">Добавить товар</a>
+            <div id="product_form">
+                <form class="form-group">
+                    {% csrf_token %}
+                    <div id="product_errors"></div>
+                    {{ product_form | crispy }}
+                    <input class="btn btn-primary" type="submit" id="submit_product" value="Добавить товар"/>
+                </form>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div id="order_items">
+                <h2>Текущий договор №<span id="order_num">{{ order.order_num }}</span></h2>
+                <span id="order_id" hidden>{{ order.id }}</span>
+
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th>Товар</th>
+                        <th>Кол-во</th>
+                        <th>Сумма со скидкой</th>
+                        <th>Скидка</th>
+                        <th>Договор</th>
+                        <th>Доставка</th>
+                    </tr>
+                    </thead>
+                    <tbody id="order_items_list">
+                    {% if order_items %}
+                        {% for oi in order_items %}
+                            {% include 'snippets/order_item_table_row.html' with orderitem=oi %}
+                        {% endfor %}
+                    {% endif %}
+                    </tbody>
+                </table>
+            </div>
+            <hr>
+            <a class="btn btn-warning btn-lg" href="{% url 'order_detail' order_id=order.id %}">Готово</a>
+        </div>
+
+    </div>
+{% endblock %}

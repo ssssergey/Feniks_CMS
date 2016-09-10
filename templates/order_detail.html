@@ -2,38 +2,34 @@
 
 {% block content %}
     <div class="row">
-        <div class="col-sm-3">
-            <h2 align="center">Изменить</h2>
-            <div class="btns">
-                <a class="btn btn-lg btn-default" href="#">Задатки</a>
-                <a class="btn btn-lg btn-default" href="#">Позиции договора и Доставки</a>
-            </div>
-        </div>
-        <div class="col-sm-9">
+        <div class="col-sm-12">
             <div class="order_description">
-                <h2>Договор №{{ order.order_num }}</h2>
-                <p>Продавец: {{ order.saler.fullname }}</p>
+                <h2 align="center">Договор №{{ order.order_num }}</h2>
                 <p>Дата продажи: {{ order.sale_date }}</p>
+                <p>Продавец: {{ order.saler.fullname }}</p>
+                <p>Покупатель: {{ order.customer_name }}</p>
+                <p>Адрес покупателя: {{ order.customer_addres }}</p>
+                <p>Телефон покупателя: {{ order.customer_phone }}</p>
                 <p>Сумма продажи: {{ order.total }} рублей</p>
                 {% if order.kredit %}
-                    <p>Оплачено кредитом</p>
+                    <p class="done">Оплачено кредитом</p>
                 {% endif %}
                 {% if order.full_money_date %}
-                    <p>Оплачено полностью: {{ order.full_money_date }}</p>
+                    <p class="done">Оплачено полностью: {{ order.full_money_date }}</p>
                 {% else %}
-                    <p>Полностью не оплачено</p>
+                    <p class="not_done">Полностью не оплачено</p>
                 {% endif %}
                 {% if order.admin_check %}
-                    <p>Администратор проверил</p>
+                    <p class="done">Администратор проверил</p>
                 {% else %}
-                    <p>Администратор не проверил</p>
+                    <p class="not_done">Администратор не проверил</p>
                 {% endif %}
                 {% if order.accountant_check %}
-                    <p>Бухгалтер проверил</p>
+                    <p class="done">Бухгалтер проверил</p>
                 {% else %}
-                    <p>Бухгалтер не проверил</p>
+                    <p class="not_done">Бухгалтер не проверил</p>
                 {% endif %}
-                {% if order.advancemoney_set %}
+                {% if order.advancemoney_set.all %}
                     <h3>Задатки: {{ order.total_advance_money }} рублей</h3>
                     <table class="table">
                         <thead>
@@ -41,6 +37,7 @@
                             <th>№</th>
                             <th>Дата получения задатка</th>
                             <th>Сумма задатка</th>
+                            <th></th>
                         </tr>
                         </thead>
                         <tbody>
@@ -49,24 +46,31 @@
                                 <td>{{ forloop.counter }}</td>
                                 <td>{{ amoney.date }}</td>
                                 <td>{{ amoney.advance_money }} рублей</td>
+                                <td><a href="{% url 'advance_money_detail' id=amoney.id %}">Подробнее</a></td>
                             </tr>
                         {% endfor %}
                         </tbody>
                     </table>
+                    {% else %}
+                    <h3>Задатков нет.</h3>
                 {% endif %}
 
-                {% if order.orderitem_set %}
+                {% if order.orderitem_set.all %}
                     <h3>Позиции договора:</h3>
                     <table class="table">
                         <thead>
                         <tr>
                             <th>№</th>
                             <th>Товар</th>
+                            <th>Кол-во</th>
                             <th>Цена</th>
                             <th>Скидка</th>
-                            <th>Количество</th>
-                            <th>Сумма</th>
-                            <th></th>
+                            <th>Сумма без скидки</th>
+                            <th>Сумма со скидкой</th>
+                            <th>Наличие</th>
+                            <th>Заказан у поставщика</th>
+                            <th>Получен от поставщика</th>
+                            <th>Доставлен покупателю</th>
                         </tr>
                         </thead>
                         <tbody id="order_items_list">
@@ -80,6 +84,9 @@
                     </table>
                 {% endif %}
             </div>
+        <hr>
+        <a class="btn btn-warning btn-lg" href="{% url 'order_edit' order_id=order.id %}">Изменить</a>
+        <hr>
         </div>
     </div>
 {% endblock %}

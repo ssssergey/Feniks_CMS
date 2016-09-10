@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-sm-4" align="center">
+            <a href="{% url 'archive_day' year=now.year month=now.month day=now.day %}" class="btn btn-lg btn-primary">Текущий
+                день</a>
+        </div>
+        <div class="col-sm-4" align="center">
+            <a href="{% url 'archive_week' year=now.year week=now|date:"W" %}" class="btn btn-lg btn-primary">Текущая
+                неделя</a>
+        </div>
+        <div class="col-sm-4" align="center">
+            <a href="{% url 'archive_month_numeric' year=now.year month=now.month %}" class="btn btn-lg btn-primary">Текущий
+                месяц</a>
+        </div>
+    </div>
+{% endblock %}

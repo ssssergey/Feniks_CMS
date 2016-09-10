@@ -21,7 +21,7 @@ ALLOWED_HOSTS = []
 
 AUTH_USER_MODEL = 'accounts.UserProfile'
 
-LOGIN_REDIRECT_URL = '/accounts/my_account'
+LOGIN_REDIRECT_URL = '/'
 
 # Application definition
 
@@ -33,6 +33,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.humanize',
+    'crispy_forms',
     'accounts',
     'managers',
 

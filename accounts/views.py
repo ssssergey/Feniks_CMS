@@ -2,14 +2,16 @@
 import time
 
 from django.contrib import messages
-from django.contrib.auth import login, authenticate, logout
+from django.contrib.auth import login, authenticate, logout, get_user_model
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render_to_response, get_object_or_404, redirect, render
 from django.template import RequestContext
+from django.http import Http404
 
 from forms import UserLoginForm
 from managers.models import Order, OrderItem
 
+User = get_user_model()
 
 # CUSTOM LOGIN
 def login_view(request):
@@ -32,7 +34,10 @@ def logout_view(request):
 
 
 @login_required
-def my_account(request, template_name="accounts/my_account.html"):
+def my_account(request, account_id):
+    page_title = u'Личный кабинет'
+    if request.user.id != int(account_id) and not request.user.is_superuser:
+        raise Http404
     if request.method == 'POST':
         postdata = request.POST.copy()
         print (postdata)
@@ -46,12 +51,12 @@ def my_account(request, template_name="accounts/my_account.html"):
             else:
                 message = u'Вы не можете удалить этот заказ.'
                 messages.warning(request, message)
-    name = request.user.get_full_name()
-    page_title = u'Личный кабинет'
-    orders = Order.objects.filter(saler=request.user)
-    user = request.user
 
-    user_oi_qs = OrderItem.active.filter(order__saler=user)
+
+    orders = Order.objects.filter(saler=request.user)
+    account_user = get_object_or_404(User, id=account_id)
+
+    user_oi_qs = OrderItem.active.filter(order__saler=account_user)
     user_oi_qs_completed = user_oi_qs.filter(order__full_money_date__isnull=False)
     # user_oi_qs_processed = user_oi_qs.filter(order__status=1)
     # user_oi_qs_submitted = user_oi_qs.filter(order__status=2)
@@ -81,11 +86,11 @@ def my_account(request, template_name="accounts/my_account.html"):
                                                              order__full_money_date__month=couple[1])
 
         for p in month_oi_qs:
-            month_obj['month_total'] += p.total
+            month_obj['month_total'] += p.total_with_discount
             month_obj['product_items'].append(p)
 
         for p in month_oi_qs_completed:
-            month_obj['month_total_completed'] += p.total
+            month_obj['month_total_completed'] += p.total_with_discount
             month_obj['product_items_completed'].append(p)
         month_obj['percent'] = 0
         if month_obj['month_total_completed'] < 500000:
@@ -95,9 +100,9 @@ def my_account(request, template_name="accounts/my_account.html"):
         month_obj['profit'] = month_obj['month_total_completed'] / 100 * month_obj['percent']
 
         for p in month_oi_qs_money_came:
-            month_obj['month_total_money_came'] += p.total
+            month_obj['month_total_money_came'] += p.total_with_discount
             month_obj['product_items_money_came'].append(p)
 
         data.append(month_obj)
 
-    return render_to_response(template_name, locals(), context_instance=RequestContext(request))
+    return render_to_response("accounts/my_account.html", locals(), context_instance=RequestContext(request))

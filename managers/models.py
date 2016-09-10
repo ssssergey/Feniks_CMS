@@ -7,6 +7,7 @@ from django.db import models
 from Feniks_CMS import settings
 
 
+
 ############### Категории ###############
 class ActiveCategoryManager(models.Manager):
     def get_query_set(self):
@@ -14,7 +15,7 @@ class ActiveCategoryManager(models.Manager):
 
 
 class Category(models.Model):
-    name = models.CharField(u'Название категории', max_length=50)
+    name = models.CharField(u'Название категории', max_length=150)
     slug = models.SlugField(max_length=50, unique=True,
                             help_text='Unique value for product page URL, created from name.')
     is_active = models.BooleanField(u'Активна', default=True)
@@ -43,15 +44,14 @@ class ActiveProductManager(models.Manager):
 
 
 class Product(models.Model):
-    name = models.CharField(u'Название товара', max_length=255, unique=True)
+    name = models.TextField(u'Название товара', unique=True)
     slug = models.SlugField(max_length=255, unique=True,
                             help_text='Unique value for product page URL, created from name.')
-    categories = models.ForeignKey(Category, verbose_name=u'Категория')
+    # categories = models.ForeignKey(Category, verbose_name=u'Категория')
     min_price = models.IntegerField(u'Мин. цена', blank=True, null=True)
     max_price = models.IntegerField(u'Макс. цена', blank=True, null=True)
     is_active = models.BooleanField(u'Активно', default=True)
-    description = models.TextField(u'Описание', blank=True, null=True,
-                                   help_text=u'Введите любое произвольное описание, если необходимо.')
+    description = models.TextField(u'Описание', blank=True, null=True)
     created_at = models.DateTimeField(u'Создан', auto_now_add=True)
     updated_at = models.DateTimeField(u'Изменен', auto_now=True)
     objects = models.Manager()
@@ -87,12 +87,15 @@ class Order(models.Model):
     order_num = models.IntegerField(u'Номер договора', null=True, unique=True)
     saler = models.ForeignKey(settings.AUTH_USER_MODEL, verbose_name=u'Менеджер', null=True)
     sale_date = models.DateField(u'Дата продажи', null=True)
+    customer_name = models.CharField(u'ФИО покупателя', max_length=150, blank=True, null=True)
+    customer_addres = models.TextField(u'Адрес доставки', blank=True, null=True)
+    customer_phone = models.CharField(u'Номер телефона', max_length=250, blank=True, null=True)
     # Полная сумма
     kredit = models.BooleanField(u'Кредит', default=False)
     full_money_date = models.DateField(u'Дата получения всей суммы', blank=True, null=True)
     # Администратор
     admin_check = models.BooleanField(u'Проверено админом', default=False)
-    is_active = models.BooleanField(u'Активно', default=False)
+    is_active = models.BooleanField(u'Активно', default=True)
     # Бухгалтер
     accountant_check = models.BooleanField(u'Проверено бухгалтером', default=False)
     objects = models.Manager()
@@ -104,7 +107,7 @@ class Order(models.Model):
         verbose_name_plural = u'Договоры'
 
     def __unicode__(self):
-        return u'Договор #{}'.format(self.order_num)
+        return u'Договор №{}'.format(self.order_num)
 
     @property
     def quantity(self):
@@ -116,7 +119,7 @@ class Order(models.Model):
         total = 0
         order_items = OrderItem.objects.filter(order=self)
         for item in order_items:
-            total += item.total
+            total += item.total_with_discount
         return total
 
     @property
@@ -149,7 +152,7 @@ class ActiveAdvanceMoneyManager(models.Manager):
 class AdvanceMoney(models.Model):
     order = models.ForeignKey(Order, verbose_name=u'Договор')
     date = models.DateField(u'Дата получения задатка', null=True)
-    advance_money = models.IntegerField(u'Сумма задатка', blank=True, null=True)
+    advance_money = models.IntegerField(u'Сумма задатка')
     is_active = models.BooleanField(u'Активно', default=True)
     objects = models.Manager()
     active = ActiveAdvanceMoneyManager()
@@ -173,23 +176,26 @@ class ActiveDeliveryManager(models.Manager):
 
 
 class Delivery(models.Model):
+    delivery_num = models.IntegerField(u'Номер доставки (реализации)', null=True, unique=True)
     date = models.DateField(u'Дата доставки', null=True)
     lifter = models.ManyToManyField(settings.AUTH_USER_MODEL, verbose_name=u'Грузчик', related_name='lifter_user')
     driver = models.ForeignKey(settings.AUTH_USER_MODEL, verbose_name=u'Водитель', related_name='driver_user',
                                null=True)
-    place = models.CharField(u'Расстояние', max_length=150, choices=((u'город', u'город'), (u'регион', u'регион')))
-    stores = models.IntegerField(u'Этажи', null=True)
-    assembly = models.IntegerField(u'Стоимость сборки', null=True)
+    addres = models.TextField(u'Адрес доставки', blank=True, null=True)
+    zone = models.CharField(u'Зона', max_length=150, choices=((u'город', u'город'), (u'регион', u'регион')))
+    stores = models.IntegerField(u'Этажи', blank=True, null=True)
+    assembly = models.IntegerField(u'Стоимость сборки', blank=True, null=True)
     is_active = models.BooleanField(u'Активно', default=True)
     objects = models.Manager()
     active = ActiveDeliveryManager()
 
     class Meta:
+        ordering = ['date']
         verbose_name = u'Доставка'
         verbose_name_plural = u'Доставки'
 
     def __unicode__(self):
-        return u'Доставка #{}'.format(self.id)
+        return u'Доставка #{}'.format(self.delivery_num)
 
 
 ##################################
@@ -205,15 +211,15 @@ class OrderItem(models.Model):
     product = models.ForeignKey(Product, verbose_name=u'Товар')
     quantity = models.IntegerField(u'Количество', default=1)
     price = models.IntegerField(u'Цена продажи')
-    discount = models.IntegerField(u'Скидка', blank=True, null=True)
-    present = models.BooleanField(u'В наличии', default=True)
+    discount = models.IntegerField(u'Скидка', default=0)
+    present = models.BooleanField(u'Наличие', default=False)
     # Заказ у поставщика
     supplier_invoice_date = models.DateField(u'Дата заказа у поставщика', blank=True, null=True)
     supplier_delivered_date = models.DateField(u'Дата получения от поставщика', blank=True, null=True)
     # Отгрузка
     delivery = models.ForeignKey(Delivery, verbose_name=u'Доставка', blank=True, null=True)
 
-    is_active = models.BooleanField(u'Активно', default=False)
+    is_active = models.BooleanField(u'Активно', default=True)
     objects = models.Manager()
     active = ActiveOrderItemManager()
 
@@ -226,8 +232,33 @@ class OrderItem(models.Model):
         return self.quantity * self.price
 
     @property
+    def total_with_discount(self):
+        return self.quantity * self.price - self.discount
+
+    @property
     def name(self):
         return self.product.name
+
+    @property
+    def ordered_from_supplier(self):
+        if self.supplier_invoice_date:
+            return True
+        else:
+            return False
+
+    @property
+    def received_from_supplier(self):
+        if self.supplier_delivered_date:
+            return True
+        else:
+            return False
+
+    @property
+    def delivered(self):
+        if self.delivery:
+            return True
+        else:
+            return False
 
     def __unicode__(self):
         return u'Позиция договора: {}'.format(self.product.name)

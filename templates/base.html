@@ -1,3 +1,5 @@
+{% load crispy_forms_tags %}
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -38,26 +40,27 @@
         <!-- Collect the nav links, forms, and other content for toggling -->
         <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
             <ul class="nav navbar-nav">
-                {#                {% if user.is_authenticated %}#}
-                {#                <li>#}
-                {#                    {{ request.user.fullname }}#}
-                {#                </li>#}
-                {#                {% endif %}#}
+                {% if request.user.is_superuser %}
+                    <li>
+                        <a href="{% url 'statistics' %}">Статистика</a>
+                    </li>
+                {% endif %}
             </ul>
             <ul class="nav navbar-nav navbar-right">
                 {% if user.is_authenticated %}
                     <li>
-                        <a href="{% url 'my_account' %}"><i class="fa fa-user fa-lg"
-                                                            aria-hidden="true"></i>&nbsp;{{ user.fullname }}</a>
+                        <a href="{% url 'my_account' account_id=user.id %}"><i class="fa fa-user fa-lg"
+                                                                               aria-hidden="true"></i>&nbsp;{{ user.fullname }}
+                        </a>
                     </li>
                     <li>
-                        <a href="{% url 'django.contrib.auth.views.logout' %}"><i class="fa fa-sign-out"
-                                                                                  aria-hidden="true"></i>&nbsp;Выйти</a>
+                        <a href="{% url 'logout' %}"><i class="fa fa-sign-out"
+                                                        aria-hidden="true"></i>&nbsp;Выйти</a>
                     </li>
                 {% else %}
                     <li>
-                        <a href="{% url 'django.contrib.auth.views.login' %}"><i class="fa fa-sign-in"
-                                                                                 aria-hidden="true"></i>&nbsp;Войти</a>
+                        <a href="{% url 'login' %}"><i class="fa fa-sign-in"
+                                                       aria-hidden="true"></i>&nbsp;Войти</a>
                     </li>
                 {% endif %}
             </ul>
@@ -73,7 +76,10 @@
     {% endblock %}
 </div>
 
-<footer></footer>
+<footer>
+    {% block footer %}
+    {% endblock %}
+</footer>
 
 <script src="/static/js/jquery.js"></script>
 <script src="/static/js/bootstrap.min.js"></script>

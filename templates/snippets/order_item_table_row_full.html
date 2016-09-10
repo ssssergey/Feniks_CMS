@@ -1,16 +1,34 @@
 <td>{{ orderitem.product.name }}</td>
-<td>{{ orderitem.price }}</td>
-<td>
-    {% if orderitem.discount %}
-        {{ orderitem.discount }}
-    {% else %}
-        0
-    {% endif %}
-</td>
 <td>{{ orderitem.quantity }}</td>
+<td>{{ orderitem.price }}</td>
+<td>{{ orderitem.discount }}</td>
 <td>{{ orderitem.total }}</td>
+<td>{{ orderitem.total_with_discount }}</td>
 {% if orderitem.present %}
-    <td>В наличии</td>
+    <td class="done">В наличии</td>
 {% else %}
     <td>На заказ</td>
+{% endif %}
+{% if not orderitem.present %}
+    {% if orderitem.ordered_from_supplier %}
+        <td class="done">Да</td>
+    {% else %}
+        <td class="not_done">Нет</td>
+    {% endif %}
+{% else %}
+    <td>Не требуется</td>
+{% endif %}
+{% if not orderitem.present %}
+    {% if orderitem.received_from_supplier %}
+        <td class="done">Да</td>
+    {% else %}
+        <td class="not_done">Нет</td>
+    {% endif %}
+{% else %}
+    <td>Не требуется</td>
+{% endif %}
+{% if orderitem.delivered %}
+    <td class="done">Да</td>
+{% else %}
+    <td class="not_done">Нет</td>
 {% endif %}

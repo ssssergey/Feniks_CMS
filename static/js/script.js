@@ -1,17 +1,70 @@
 $(document).ready(function () {
-    $("#product_form").addClass('hidden');
-    $("#add_product").addClass('visible');
+    $("#product_form").css('display', 'none');
+    $("#add_product").css('display', 'block');
     $("#add_product").click(slideToggleForm);
     $("#submit_product").click(addProduct);
     $("#product_list").on('click', '.submit_add_to_order', addToOrder);
+    $("#order_items_delivery").on('click', '.add_to_delivery_btn', addToDelivery);
+    $("#get_orderitems_btn").click(extractOrderItems);
     // $(".submit_add_to_order").click(addToOrder);
-
 });
 
 
+
+function addToDelivery(e) {
+    e.preventDefault();
+    console.log('Click!');
+    var oi_id = $(this).attr('id');
+    var delivery_num = $('span#delivery_num').text();
+    console.log(oi_id, delivery_num);
+
+
+    var data = {
+        oi_id: oi_id,
+        delivery_num: delivery_num
+    };
+
+    url = "/orderitem_to_delivery";
+
+    $.ajax({
+        url: url,
+        type: "GET",
+        data: data,
+        dataType: "json",
+        success: function (response) {
+            $(".product_errors").empty();
+            console.log(response.html);
+            if (response.success == "True") {
+                $("#order_items_list").append(response.html).slideDown();
+            }
+            else {
+                $(".product_errors").append(response.html);
+            }
+        }
+    });
+}
+
+
+function extractOrderItems(e) {
+    e.preventDefault();
+    var data = {
+        order_num: $('#order_num').val()
+    };
+    url = "/get_orderitems";
+    $.ajax({
+        url: url,
+        type: "GET",
+        data: data,
+        dataType: "json",
+        success: function (response) {
+            $("#order_items_delivery").html(response.html);
+        }
+    });
+}
+
 function slideToggleForm() {
-    $("#product_form").slideToggle().removeClass();
-    $("#add_product").slideToggle().removeClass();
+    $("#product_form").slideToggle();
+    $("#add_product").slideToggle();
 }
 
 function addProduct(e) {
@@ -23,8 +76,9 @@ function addProduct(e) {
         description: $("#id_description").val(),
         csrfmiddlewaretoken: csrf_tag
     };
+    console.log(data);
 
-    url = "/product_add";
+    url = "/product_create";
 
     $.ajax({
         url: url,
@@ -39,13 +93,14 @@ function addProduct(e) {
                 $("#product_list").append(response.html).slideDown();
                 $("#product_list").children(":last").addClass('newly_added_product');
                 $("#product_form").slideToggle();
-                $("#add_product").slideToggle().addClass('visible');
+                $("#add_product").slideToggle();
                 $("#id_name").val('');
                 $("#id_categories").val('');
                 $("#id_description").val('');
             }
             else {
-                $(this).closest(".product_errors").append(response.html);
+                $(".product_errors").append(response.html);
+                console.log(response.html)
             }
         }
     });
@@ -53,7 +108,7 @@ function addProduct(e) {
 
 function addToOrder(e) {
     e.preventDefault();
-    console.log('Click!');
+
     var form_tag = $(this).closest('form');
 
     var order_id = $("#order_id").text();
@@ -77,7 +132,9 @@ function addToOrder(e) {
         csrfmiddlewaretoken: document.getElementsByName('csrfmiddlewaretoken')[0].value
     };
 
-    url = "/add_to_order";
+    console.log(data);
+
+    url = "/product_to_order";
 
     $.ajax({
         url: url,

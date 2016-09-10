@@ -1,22 +1,69 @@
 # -*- coding: utf-8 -*-
 from django import forms
+from django.contrib.auth import get_user_model
 
-from .models import Product, Order
+from .models import Product, Order, OrderItem, Delivery, AdvanceMoney
+from Feniks_CMS import settings
 
+User = get_user_model()
 
 class ProductForm(forms.ModelForm):
     class Meta:
         model = Product
-        fields = ['name', 'categories', 'description']
+        fields = ['name', 'description']
+        widgets = {
+            'name': forms.Textarea(attrs={'rows': 2}),
+            'description': forms.Textarea(attrs={'rows': 3}),
+        }
 
 
 class OrderForm(forms.ModelForm):
     class Meta:
         model = Order
-        fields = ['order_num', 'sale_date', 'kredit']
+        fields = ['order_num', 'sale_date', 'customer_name', 'customer_addres', 'customer_phone', 'kredit']
         widgets = {
             'sale_date': forms.DateInput(attrs={'class': 'datepicker'}),
+            'customer_addres': forms.Textarea(attrs={'rows': 3}),
         }
+
+
+class OrderItemForm(forms.ModelForm):
+    class Meta:
+        model = OrderItem
+        fields = ['product', 'quantity', 'price', 'discount', 'present', 'supplier_invoice_date',
+                  'supplier_delivered_date', 'delivery']
+        widgets = {
+            'supplier_invoice_date': forms.DateInput(attrs={'class': 'datepicker'}),
+            'supplier_delivered_date': forms.DateInput(attrs={'class': 'datepicker'}),
+            # 'customer_addres': forms.Textarea(attrs={'rows': 3}),
+        }
+
+
+class AdvanceMoneyForm(forms.ModelForm):
+    order_num = forms.IntegerField(label=u'Номер договора', required=False)
+
+    class Meta:
+        model = AdvanceMoney
+        fields = ['order_num', 'date', 'advance_money']
+        widgets = {
+            'date': forms.DateInput(attrs={'class': 'datepicker'}),
+        }
+
+
+class DeliveryForm(forms.ModelForm):
+    class Meta:
+        model = Delivery
+        fields = ['delivery_num', 'date', 'driver', 'lifter', 'addres', 'zone', 'stores', 'assembly']
+        widgets = {
+            'date': forms.DateInput(attrs={'class': 'datepicker'}),
+            'lifter': forms.CheckboxSelectMultiple(),
+            'addres': forms.Textarea(attrs={'rows': 3}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super(DeliveryForm, self).__init__(*args, **kwargs)
+        self.fields['driver'].queryset = User.objects.filter(role_driver=True)
+        self.fields['lifter'].queryset = User.objects.filter(role_lifter=True)
 
         # def clean(self):
         #     cleaned_data = super(OrderForm, self).clean()

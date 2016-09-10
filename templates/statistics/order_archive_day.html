@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-sm-12">
+            <h1>{{ day }}</h1>
+            {% include 'snippets/table_of_orders.html' with orders=object_list %}
+
+        </div>
+    </div>
+{% endblock %}
+
+{% block footer %}
+    <p>
+        {% if previous_day %}
+            <a href="{% url 'archive_day' year=previous_day.year month=previous_day.month day=previous_day.day %}">
+                Предыдущий день: {{ previous_day }}
+            </a>
+        {% endif %}
+        {% if previous_day and next_day %}-|-{% endif %}
+        {% if next_day %}
+            <a href="{% url 'archive_day' year=next_day.year month=next_day.month day=next_day.day %}">
+                Следующий день: {{ next_day }}
+            </a>
+        {% endif %}
+    </p>
+{% endblock %}
