@@ -7,36 +7,155 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render_to_response, get_object_or_404, redirect, render
 from django.template import RequestContext
 from django.http import Http404
+from django.views.generic.dates import MonthArchiveView
+from django.contrib.auth.mixins import LoginRequiredMixin
 
 from forms import UserLoginForm
-from managers.models import Order, OrderItem
+from managers.models import Order, OrderItem, AdvanceMoney, Delivery
 
 User = get_user_model()
 
-# CUSTOM LOGIN
-def login_view(request):
-    print(request.user.is_authenticated())
-    page_title = u"Вход"
-    form = UserLoginForm(request.POST or None)
-    if form.is_valid():
-        username = form.cleaned_data.get('username')
-        password = form.cleaned_data.get('password')
-        user = authenticate(username=username, password=password)
-        login(request, user)
-        return redirect('/')
-    return render(request, "accounts/login.html", {"form": form, "page_title": page_title})
+class SalerMonthArchiveView(LoginRequiredMixin, MonthArchiveView):
+    queryset = Order.objects.all()
+    date_field = "sale_date"
+    template_name = 'accounts/salers_archive_month.html'
+    allow_empty = True
+    month_format = '%m'
+    ordering = 'sale_date'
+
+    def get_queryset(self):
+        qs = super(SalerMonthArchiveView, self).get_queryset()
+        qs = qs.filter(saler__id=self.kwargs['user_id'])
+        return qs
+
+    def get_context_data(self, **kwargs):
+        context = super(SalerMonthArchiveView, self).get_context_data(**kwargs)
+        user_id = self.kwargs['user_id']
+        user = get_object_or_404(User, id=user_id)
+        context['current_user'] = user
+
+        qs = context['object_list']
+
+        total = 0
+        for order in qs:
+            total += order.total
+        context['total'] = total
+        realiz_qs = qs.filter(full_money_date__isnull=False)
+
+        realiz_total = 0
+        for order in realiz_qs:
+            realiz_total += order.total
+        context['realiz_total'] = realiz_total
+        context['realiz_qs'] = realiz_qs
+
+        am_qs = AdvanceMoney.objects.filter(order__in=qs)
+        am_total = 0
+        for am in am_qs:
+            am_total += am.advance_money
+        context['am_total'] = am_total
+        context['am_qs'] = am_qs
+
+        all_qs = self.get_queryset()
+        realiz_cashin_qs = all_qs.filter(full_money_date__month=self.get_month())
+
+        realiz_cashin_total = 0
+        for order in realiz_cashin_qs:
+            realiz_cashin_total += order.total
+        context['realiz_cashin_total'] = realiz_cashin_total
+        context['realiz_cashin_qs'] = realiz_cashin_qs
 
 
-# CUSTOM LOGOUT
-def logout_view(request):
-    logout(request)
-    return render(request, "index.html", {})
+        am_cashin_qs = AdvanceMoney.objects.filter(date__month=self.get_month())
+        am_cashin_total = 0
+        for am in am_cashin_qs:
+            am_cashin_total += am.advance_money
+        context['am_cashin_total'] = am_cashin_total
+        context['am_cashin_qs'] = am_cashin_qs
+
+        return context
+
+class LifterMonthArchiveView(LoginRequiredMixin, MonthArchiveView):
+    queryset = Delivery.objects.all()
+    date_field = "date"
+    template_name = 'accounts/lifters_archive_month.html'
+    allow_empty = True
+    month_format = '%m'
+    ordering = 'date'
+
+    def get_queryset(self):
+        qs = super(LifterMonthArchiveView, self).get_queryset()
+        qs = qs.filter(lifter__id=self.kwargs['user_id'])
+        return qs
+
+    def get_context_data(self, **kwargs):
+        context = super(LifterMonthArchiveView, self).get_context_data(**kwargs)
+        user_id = self.kwargs['user_id']
+        user = get_object_or_404(User, id=user_id)
+        context['current_user'] = user
+
+        return context
+
+
+class DriverMonthArchiveView(LoginRequiredMixin, MonthArchiveView):
+    queryset = Delivery.objects.all()
+    date_field = "date"
+    template_name = 'accounts/drivers_archive_month.html'
+    allow_empty = True
+    month_format = '%m'
+    ordering = 'date'
+
+    def get_queryset(self):
+        qs = super(DriverMonthArchiveView, self).get_queryset()
+        qs = qs.filter(driver__id=self.kwargs['user_id'])
+        return qs
+
+    def get_context_data(self, **kwargs):
+        context = super(DriverMonthArchiveView, self).get_context_data(**kwargs)
+        user_id = self.kwargs['user_id']
+        user = get_object_or_404(User, id=user_id)
+        context['current_user'] = user
+
+        driver_lifts = Delivery.objects.filter(lifter__id=self.kwargs['user_id'])
+        context['driver_lifts'] = driver_lifts
+        return context
+
+class AdminMonthArchiveView(LoginRequiredMixin, MonthArchiveView):
+    queryset = OrderItem.objects.all()
+    date_field = "supplier_invoice_date"
+    template_name = 'accounts/admins_archive_month.html'
+    allow_empty = True
+    month_format = '%m'
+
+    def get_context_data(self, **kwargs):
+        context = super(AdminMonthArchiveView, self).get_context_data(**kwargs)
+        user_id = self.kwargs['user_id']
+        user = get_object_or_404(User, id=user_id)
+        context['current_user'] = user
+
+        return context
+
+# def login_view(request):
+#     print(request.user.is_authenticated())
+#     page_title = u"Вход"
+#     form = UserLoginForm(request.POST or None)
+#     if form.is_valid():
+#         username = form.cleaned_data.get('username')
+#         password = form.cleaned_data.get('password')
+#         user = authenticate(username=username, password=password)
+#         login(request, user)
+#         return redirect('/')
+#     return render(request, "accounts/login.html", {"form": form, "page_title": page_title})
+#
+#
+# def logout_view(request):
+#     logout(request)
+#     return render(request, "index.html", {})
 
 
 @login_required
-def my_account(request, account_id):
+def saler(request, id):
     page_title = u'Личный кабинет'
-    if request.user.id != int(account_id) and not request.user.is_superuser:
+    if request.user.id != int(id) and not request.user.is_superuser:
         raise Http404
     if request.method == 'POST':
         postdata = request.POST.copy()
@@ -52,9 +171,8 @@ def my_account(request, account_id):
                 message = u'Вы не можете удалить этот заказ.'
                 messages.warning(request, message)
 
-
-    orders = Order.objects.filter(saler=request.user)
-    account_user = get_object_or_404(User, id=account_id)
+    account_user = get_object_or_404(User, id=id)
+    orders = Order.objects.filter(saler=account_user)
 
     user_oi_qs = OrderItem.active.filter(order__saler=account_user)
     user_oi_qs_completed = user_oi_qs.filter(order__full_money_date__isnull=False)
@@ -105,4 +223,6 @@ def my_account(request, account_id):
 
         data.append(month_obj)
 
-    return render_to_response("accounts/my_account.html", locals(), context_instance=RequestContext(request))
+    return render_to_response("accounts/saler.html", locals(), context_instance=RequestContext(request))
+
+

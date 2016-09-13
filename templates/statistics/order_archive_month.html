@@ -6,21 +6,21 @@
         <div class="col-sm-12">
             <h1>{{ month|date:'F Y' }}</h1>
             <hr>
-            <h2>Общая сумма продаж в этом месяце: {{ total|intcomma }} рублей.</h2>
+            <h2>1. Общая сумма продаж в этом месяце: {{ total|intcomma }} рублей.</h2>
             {% include 'snippets/table_of_orders.html' with orders=object_list %}
             <hr>
-            <h2>Реализовано из проданного в этом месяце на сумму: {{ realiz_total|intcomma }} рублей.</h2>
+            <h2>2. Реализовано из проданного в этом месяце на сумму: {{ realiz_total|intcomma }} рублей.</h2>
             {% include 'snippets/table_of_orders.html' with orders=realiz_qs %}
             <hr>
-            <h2>Сумма задатков по продажам в этом месяце: {{ am_total|intcomma }} рублей.</h2>
+            <h2>3. Сумма задатков по продажам в этом месяце: {{ am_total|intcomma }} рублей.</h2>
             {% for am in am_qs %}
                 <p>{{ am.date }} - {{ am.order }} - {{ am.advance_money }} рублей.</p>
             {% endfor %}
             <hr style="height: 5px; background-color: black; margin: 50px 0">
-            <h2>Реализовано в этом месяце на сумму: {{ realiz_cashin_total|intcomma }} рублей.</h2>
+            <h2>4. Реализовано в этом месяце на сумму: {{ realiz_cashin_total|intcomma }} рублей.</h2>
             {% include 'snippets/table_of_orders.html' with orders=realiz_cashin_qs %}
             <hr>
-            <h2>Сумма задатков, полученных в этом месяце: {{ am_cashin_total|intcomma }} рублей.</h2>
+            <h2>5. Сумма задатков, полученных в этом месяце: {{ am_cashin_total|intcomma }} рублей.</h2>
             {% for am in am_cashin_qs %}
                 <p>{{ am.date }} - {{ am.order }} - {{ am.advance_money }} рублей.</p>
             {% endfor %}

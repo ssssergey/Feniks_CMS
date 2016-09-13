@@ -5,10 +5,10 @@ $(document).ready(function () {
     $("#submit_product").click(addProduct);
     $("#product_list").on('click', '.submit_add_to_order', addToOrder);
     $("#order_items_delivery").on('click', '.add_to_delivery_btn', addToDelivery);
+    $("#order_items_list").on('click', '.delete_from_order_btn', deleteFromOrder);
     $("#get_orderitems_btn").click(extractOrderItems);
     // $(".submit_add_to_order").click(addToOrder);
 });
-
 
 
 function addToDelivery(e) {
@@ -154,11 +154,38 @@ function addToOrder(e) {
     });
 }
 
+
+function deleteFromOrder(e) {
+    e.preventDefault();
+    var row = $(this).parents('tr');
+    var oi_id = $(this).attr('id');
+    console.log(oi_id);
+
+    var data = {
+        oi_id: oi_id
+    };
+
+    url = "/delete_oi_from_order";
+
+    $.ajax({
+        url: url,
+        type: "GET",
+        data: data,
+        dataType: "json",
+        success: function (response) {
+            console.log(response.html);
+            row.remove();
+        }
+    });
+}
+
+
 $('.datepicker').datepicker({
     todayBtn: "linked",
     language: "ru",
     daysOfWeekHighlighted: "0,6",
-    todayHighlight: true
+    todayHighlight: true,
+    orientation: 'bottom',
 });
 
 // from my_account

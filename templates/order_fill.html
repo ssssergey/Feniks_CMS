@@ -4,7 +4,7 @@
 {% block content %}
     <div class="row">
         <div class="col-sm-6">
-            <h2>Номенклатура товаров</h2>
+            <h2>Номенклатура товаров для добавления в договор</h2>
             <table class="table">
                 <thead>
                 <tr>
@@ -20,7 +20,7 @@
             </table>
             <div class="product_errors"></div>
 
-            <a class="btn btn-warning" id="add_product">Добавить товар</a>
+            <a class="btn btn-warning" id="add_product">Создать товар в номенклатуре</a>
             <div id="product_form">
                 <form class="form-group">
                     {% csrf_token %}

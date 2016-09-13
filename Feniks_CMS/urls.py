@@ -7,7 +7,7 @@ from managers.views import *
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
-    url(r'^accounts/', include('accounts.urls')),
+    url(r'^', include('accounts.urls')),
     url(r'^', include('managers.urls')),
     url(r'^', include('statistics.urls')),
     url(r'^$', index, name='home'),

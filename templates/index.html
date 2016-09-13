@@ -2,37 +2,39 @@
 
 {% block content %}
 
-    <div class="row">
-        <div class="col-sm-12" align="center">
-            <a href="{% url 'order_create' %}" class="btn btn-lg btn-primary btn_margin">Новый договор</a>
-            <form method="get" action="{% url 'find_order' %}">
-                <div class="col-sm-2 input-group">
-                    <input name="order_num" type="text" class="form-control" placeholder="Номер договора">
+    {% if request.user.role_saler or request.user.role_admin or request.user.is_superuser %}
+        <div class="row">
+            <div class="col-sm-12" align="center">
+                <a href="{% url 'order_create' %}" class="btn btn-lg btn-primary btn_margin">Новый договор</a>
+                <form method="get" action="{% url 'find_order' %}">
+                    <div class="col-sm-2 input-group">
+                        <input name="order_num" type="text" class="form-control" placeholder="Номер договора">
                   <span class="input-group-btn">
                     <button class="btn btn-warning" type="submit">Найти</button>
                   </span>
-                </div>
-            </form>
+                    </div>
+                </form>
+            </div>
         </div>
-    </div>
-    <hr>
-    <div class="row">
-        <div class="col-sm-6" align="center">
-            <a href="{% url 'advance_money_create' %}" class="btn btn-lg btn-primary btn_margin">Добавить задаток по договору</a>
-        </div>
-        <div class="col-sm-6" align="center">
-            <a href="{% url 'delivery_create' %}" class="btn btn-lg btn-primary btn_margin">Добавить доставку</a>
-            <form method="get" action="{% url 'find_delivery' %}">
-                <div class="col-sm-5 input-group">
-                    <input name="delivery_num" type="text" class="form-control" placeholder="Номер доставки">
+        <hr>
+        <div class="row">
+            <div class="col-sm-6" align="center">
+                <a href="{% url 'advance_money_create' %}" class="btn btn-lg btn-primary btn_margin">Добавить задаток по
+                    договору</a>
+            </div>
+            <div class="col-sm-6" align="center">
+                <a href="{% url 'delivery_create' %}" class="btn btn-lg btn-primary btn_margin">Добавить доставку</a>
+                <form method="get" action="{% url 'find_delivery' %}">
+                    <div class="col-sm-5 input-group">
+                        <input name="delivery_num" type="text" class="form-control" placeholder="Номер доставки">
                   <span class="input-group-btn">
                     <button class="btn btn-warning" type="submit">Найти</button>
                   </span>
-                </div>
-            </form>
+                    </div>
+                </form>
+            </div>
         </div>
-    </div>
-    <hr>
-
+        <hr>
+    {% endif %}
 
 {% endblock %}

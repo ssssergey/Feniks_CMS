@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import os
-
+import socket
 from secret import *
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
@@ -17,10 +17,11 @@ SECRET_KEY = secret_key
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*"]
 
 AUTH_USER_MODEL = 'accounts.UserProfile'
 
+LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = '/'
 
 # Application definition
@@ -122,10 +123,18 @@ USE_L10N = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.9/howto/static-files/
 
+MEDIA_URL = '/media/'
 STATIC_URL = '/static/'
 
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, "static"),
-]
+MEDIA_ROOT = os.path.join(BASE_DIR, "media")
+
+if socket.gethostname() != 'asus-UX32LN':
+    STATIC_ROOT = os.path.join(BASE_DIR, "static")
+else:
+    STATICFILES_DIRS = [
+        os.path.join(BASE_DIR, "static"),
+    ]
 
 SITE_NAME = u'Феникс'
+
+ADMINS = [('lse', 'lse1983@mail.ru')]

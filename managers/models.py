@@ -195,7 +195,7 @@ class Delivery(models.Model):
         verbose_name_plural = u'Доставки'
 
     def __unicode__(self):
-        return u'Доставка #{}'.format(self.delivery_num)
+        return u'Доставка №{}'.format(self.delivery_num)
 
 
 ##################################

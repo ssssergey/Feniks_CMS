@@ -3,13 +3,19 @@ from datetime import datetime
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.utils.decorators import method_decorator
 from django.views.generic.dates import MonthArchiveView, WeekArchiveView, DayArchiveView
+from django.contrib.auth import get_user_model
 
 from managers.models import Order, AdvanceMoney
 
+User = get_user_model()
 
 @user_passes_test(lambda u: u.is_superuser)
 def statistics(request):
     now = datetime.now()
+    salers = User.objects.filter(role_saler=True)
+    lifters = User.objects.filter(role_lifter=True)
+    drivers = User.objects.filter(role_driver=True)
+    admins = User.objects.filter(role_admin=True)
     return render(request, "statistics/statistics.html", locals())
 
 
@@ -18,6 +24,7 @@ class OrderMonthArchiveView(MonthArchiveView):
     date_field = "sale_date"
     template_name = 'statistics/order_archive_month.html'
     allow_empty = True
+    ordering = 'sale_date'
 
     @method_decorator(user_passes_test(lambda u: u.is_superuser))
     def dispatch(self, *args, **kwargs):
@@ -71,6 +78,7 @@ class OrderWeekArchiveView(WeekArchiveView):
     week_format = "%W"
     template_name = 'statistics/order_archive_week.html'
     allow_empty = True
+    ordering = 'sale_date'
 
     @method_decorator(user_passes_test(lambda u: u.is_superuser))
     def dispatch(self, *args, **kwargs):
@@ -82,6 +90,7 @@ class OrderDayArchiveView(DayArchiveView):
     date_field = "sale_date"
     template_name = 'statistics/order_archive_day.html'
     allow_empty = True
+    ordering = 'sale_date'
 
     @method_decorator(user_passes_test(lambda u: u.is_superuser))
     def dispatch(self, *args, **kwargs):

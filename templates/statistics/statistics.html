@@ -2,17 +2,50 @@
 
 {% block content %}
     <div class="row">
+        <div class="col-sm-12" align="center">
+            <h1>Статистика за периоды:</h1>
+        </div>
         <div class="col-sm-4" align="center">
-            <a href="{% url 'archive_day' year=now.year month=now.month day=now.day %}" class="btn btn-lg btn-primary">Текущий
+            <a href="{% url 'archive_day' year=now.year month=now.month day=now.day %}" class="btn btn-lg btn-default">Текущий
                 день</a>
         </div>
         <div class="col-sm-4" align="center">
-            <a href="{% url 'archive_week' year=now.year week=now|date:"W" %}" class="btn btn-lg btn-primary">Текущая
+            <a href="{% url 'archive_week' year=now.year week=now|date:"W" %}" class="btn btn-lg btn-default">Текущая
                 неделя</a>
         </div>
         <div class="col-sm-4" align="center">
-            <a href="{% url 'archive_month_numeric' year=now.year month=now.month %}" class="btn btn-lg btn-primary">Текущий
+            <a href="{% url 'archive_month_numeric' year=now.year month=now.month %}" class="btn btn-lg btn-default">Текущий
                 месяц</a>
+        </div>
+    </div>
+    <hr>
+    <div class="row">
+        <div class="col-sm-12" align="center">
+            <h1>Статистика по персоналу:</h1>
+        </div>
+        <div class="col-sm-3" align="center">
+            <h2>Менеджеры</h2>
+            {% for saler in salers %}
+                <p><a href="{% url 'saler_account' year=now.year month=now.month user_id=saler.id %}">{{ saler.fullname }}</a></p>
+            {% endfor %}
+        </div>
+        <div class="col-sm-3" align="center">
+            <h2>Грузчики</h2>
+            {% for lifter in lifters %}
+                <p><a href="{% url 'lifter_account' year=now.year month=now.month user_id=lifter.id %}">{{ lifter.fullname }}</a></p>
+            {% endfor %}
+        </div>
+        <div class="col-sm-3" align="center">
+            <h2>Водители</h2>
+            {% for driver in drivers %}
+                <p><a href="{% url 'driver_account' year=now.year month=now.month user_id=driver.id %}">{{ driver.fullname }}</a></p>
+            {% endfor %}
+        </div>
+        <div class="col-sm-3" align="center">
+            <h2>Администраторы</h2>
+            {% for admin in admins %}
+                <p><a href="{% url 'admin_account' year=now.year month=now.month user_id=admin.id %}">{{ admin.fullname }}</a></p>
+            {% endfor %}
         </div>
     </div>
 {% endblock %}

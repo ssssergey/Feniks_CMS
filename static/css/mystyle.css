@@ -64,7 +64,7 @@ p, li {
 }
 
 .product_errors {
-    background-color: red;
+    background-color: rgba(255, 69, 0, 0.52);
 }
 
 .order_description {
@@ -85,11 +85,11 @@ p, li {
 }
 
 .errorlist {
-    background-color: pink;
+    background-color: rgba(255, 69, 0, 0.52);
 }
 
 .help-block {
-    background-color: pink;
+    background-color: rgba(255, 69, 0, 0.52);
 }
 
 .control-label {
@@ -98,16 +98,21 @@ p, li {
 }
 
 .not_done {
-    background: rgba(255, 69, 0, 0.52)
+    background: rgba(255, 69, 0, 0.52);
 }
 
 .done {
-    background: rgba(59, 255, 93, 0.52)
+    background: rgba(59, 255, 93, 0.52);
 }
 
 .messages .warning {
-    background-color: orange;
+    background-color: rgba(255, 0, 0, 0.57);
 }
+
+.messages .info {
+    background-color: rgba(0, 128, 0, 0.64);
+}
+
 
 /*.btn {*/
 /*margin: 20px;*/

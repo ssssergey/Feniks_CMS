@@ -5,7 +5,7 @@ from datetime import datetime
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect, Http404
 from django.shortcuts import render, get_object_or_404
 from django.template.loader import render_to_string
 from django.views.generic import ListView, CreateView
@@ -17,6 +17,10 @@ from .models import Order, Product, Category, OrderItem, AdvanceMoney, Delivery
 
 @login_required
 def index(request):
+    now = datetime.now()
+    limit_date = datetime(2016, 11, 1)
+    if now > limit_date:
+        raise Http404
     return render(request, "index.html", locals())
 
 
@@ -31,7 +35,7 @@ def order_create(request):
             obj.save()
             order_id = obj.id
             order_num = request.POST.get('order_num')
-            messages.warning(request, u'Договор №{} создан. Теперь добавьте укажите товары.'.format(order_num))
+            messages.info(request, u'Договор №{} создан. Теперь добавьте укажите товары.'.format(order_num))
             return HttpResponseRedirect(reverse('order_fill', kwargs={'order_id': order_id}))
     return render(request, "order_create.html", locals())
 
@@ -39,12 +43,14 @@ def order_create(request):
 @login_required
 def order_edit(request, order_id):
     order = get_object_or_404(Order, id=order_id)
+    if order.saler != request.user and not request.user.is_superuser:
+        messages.warning(request, u'Вы не можете изменять этот договор, потому что не вы его заключали.')
+        return HttpResponseRedirect(reverse('home'))
     form = OrderForm(instance=order)
     if request.method == 'POST':
         form = OrderForm(request.POST, instance=order)
         if form.is_valid():
             form.save()
-            messages.warning(request, u'Изменения приняты.')
             return HttpResponseRedirect(reverse('order_fill', kwargs={'order_id': order_id}))
     return render(request, "order_edit.html", locals())
 
@@ -82,12 +88,25 @@ def order_fill(request, order_id):
     product_form = ProductForm()
     return render(request, "order_fill.html", locals())
 
+
+@login_required
+def delete_oi_from_order(request):
+    oi_id = request.GET.get('oi_id')
+    try:
+        oi = OrderItem.objects.get(id=oi_id)
+        oi.delete()
+        response = json.dumps({'success': 'True', 'html': u'Удалено'})
+    except Exception as e:
+        response = json.dumps({'success': 'False', 'html': str(e)})
+    return HttpResponse(response, content_type='application/javascript; charset=utf-8')
+
+
 @login_required
 def product_create(request):
     form = ProductForm(request.POST)
     if form.is_valid():
         new_product = form.save(commit=False)
-        # cat_id = request.POST.get('categories')
+        # cat_id = request.POST.get('categories')N
         # new_product.categories = Category.active.get(id=cat_id)
         new_product.slug = slugify(new_product.name)
         new_product.save()
@@ -99,6 +118,7 @@ def product_create(request):
         print(html)
         response = json.dumps({'success': 'False', 'html': html})
     return HttpResponse(response, content_type='application/javascript; charset=utf-8')
+
 
 @login_required
 def product_to_order(request):
@@ -139,7 +159,7 @@ def advance_money_create(request):
                 obj = form.save(commit=False)
                 obj.order = order
                 obj.save()
-                messages.warning(request, u'Задаток для Договора №{} добавлен.'.format(order_num))
+                messages.info(request, u'Задаток для Договора №{} добавлен.'.format(order_num))
                 return HttpResponseRedirect(reverse('home'))
             except:
                 form.add_error('order_num', u'Договора №{} не существует.'.format(order_num))
@@ -161,7 +181,7 @@ def advance_money_edit(request, id):
         form = AdvanceMoneyForm(request.POST, instance=am)
         if form.is_valid():
             form.save()
-            messages.warning(request, u'Изменения приняты.')
+            messages.info(request, u'Изменения приняты.')
             return HttpResponseRedirect(reverse('advance_money_detail', kwargs={'id': id}))
     return render(request, "advance_money_edit.html", locals())
 
@@ -176,7 +196,7 @@ def delivery_create(request):
             obj = form.save()
             delivery_id = obj.id
             delivery_num = request.POST.get('delivery_num')
-            messages.warning(request, u'Доставка №{} создана. Теперь добавьте укажите товары.'.format(delivery_num))
+            messages.info(request, u'Доставка №{} создана. Теперь добавьте укажите товары.'.format(delivery_num))
             # return render(request, "delivery_fill.html", locals())
             return HttpResponseRedirect(reverse('delivery_fill', kwargs={'id': delivery_id}))
     return render(request, "delivery_create.html", locals())
@@ -197,7 +217,6 @@ def delivery_edit(request, id):
         form = DeliveryForm(request.POST, instance=delivery)
         if form.is_valid():
             form.save()
-            messages.warning(request, u'Изменения приняты.')
             return HttpResponseRedirect(reverse('delivery_fill', kwargs={'id': id}))
     return render(request, "delivery_edit.html", locals())
 
@@ -207,6 +226,7 @@ def delivery_fill(request, id):
     delivery = get_object_or_404(Delivery, id=id)
     order_items = OrderItem.objects.filter(delivery=delivery)
     return render(request, "delivery_fill.html", locals())
+
 
 @login_required
 def get_orderitems(request):
@@ -221,6 +241,7 @@ def get_orderitems(request):
         html = u'Такого договора не существует!'
         response = json.dumps({'success': 'False', 'html': html})
     return HttpResponse(response, content_type='application/javascript; charset=utf-8')
+
 
 @login_required
 def orderitem_to_delivery(request):
@@ -245,6 +266,7 @@ def orderitem_to_delivery(request):
             response = json.dumps({'success': 'False', 'html': html})
     return HttpResponse(response, content_type='application/javascript; charset=utf-8')
 
+
 @login_required
 def find_delivery(request):
     delivery_num = request.GET.get('delivery_num')
@@ -255,6 +277,7 @@ def find_delivery(request):
         return render(request, "index.html", {})
     delivery_id = delivery.id
     return HttpResponseRedirect(reverse('delivery_detail', kwargs={'id': delivery_id}))
+
 
 @login_required
 def find_order(request):

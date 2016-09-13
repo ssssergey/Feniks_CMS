@@ -8,10 +8,32 @@
             <hr>
             <h1>{{ month|date:'F Y' }}</h1>
             <hr>
-            <h2>1. Общая количество доставок: {{ object_list|length }}.</h2>
-            {% for delivery in object_list %}
-                <p>{{ forloop.counter }}. {{ delivery }} - {{ delivery.date }}</p>
-            {% endfor %}
+            <h2>1. Заказы у поставщиков: {{ object_list|length }}.</h2>
+
+            <table class="table table-striped table-responsive">
+                <thead>
+                <tr>
+                    <th></th>
+                    <th>Товар</th>
+                    <th>Договор</th>
+                    <th>Дата заказ у поставшика</th>
+                    <th>Дата получения от поставщика</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for oi in object_list %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{ oi.product }}</td>
+                        <td>{{ oi.order }}</td>
+                        <td>{{ oi.supplier_invoice_date }}</td>
+                        <td>{{ oi.supplier_delivered_date }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+
+
             <hr>
 
         </div>
@@ -21,12 +43,12 @@
 {% block footer %}
     <p>
         {% if previous_month %}
-            <a href="{% url 'driver_account' user_id=current_user.id year=previous_month.year month=previous_month.month %}">Предыдущий
+            <a href="{% url 'admin_account' user_id=current_user.id year=previous_month.year month=previous_month.month %}">Предыдущий
                 месяц: {{ previous_month|date:"F Y" }}</a>
         {% endif %}
         {% if previous_month and next_month %}-|-{% endif %}
         {% if next_month %}
-            <a href="{% url 'driver_account' user_id=current_user.id year=next_month.year month=next_month.month %}">
+            <a href="{% url 'admin_account' user_id=current_user.id year=next_month.year month=next_month.month %}">
                 Следующий месяц: {{ next_month|date:"F Y" }}
             </a>
         {% endif %}
