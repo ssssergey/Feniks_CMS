@@ -51,7 +51,7 @@
                         {% endfor %}
                         </tbody>
                     </table>
-                    {% else %}
+                {% else %}
                     <h3>Задатков нет.</h3>
                 {% endif %}
 
@@ -84,9 +84,12 @@
                     </table>
                 {% endif %}
             </div>
-        <hr>
-        <a class="btn btn-warning btn-lg" href="{% url 'order_edit' order_id=order.id %}">Изменить</a>
-        <hr>
+            <hr>
+            <a class="btn btn-warning btn-lg" href="{% url 'order_edit' order_id=order.id %}">Изменить</a>
+            {% if request.user.role_admin %}
+                <a class="btn btn-info btn-lg" href="{% url 'admin_check' order_id=order.id %}">Проверено</a>
+            {% endif %}
+            <hr>
         </div>
     </div>
 {% endblock %}

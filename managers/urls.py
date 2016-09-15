@@ -22,8 +22,10 @@ urlpatterns = [
     url(r'^delivery_fill/(?P<id>[0-9]+)$', delivery_fill, name='delivery_fill'),
     url(r'^get_orderitems$', get_orderitems, name='get_orderitems'),
     url(r'^orderitem_to_delivery$', orderitem_to_delivery, name='orderitem_to_delivery'),
-    url(r'^delete_oi_from_order$', delete_oi_from_order, name='delete_oi_from_order'),
+    url(r'^orderitem_delete$', orderitem_delete, name='orderitem_delete'),
+    url(r'^orderitem_edit/(?P<id>[0-9]+)$', orderitem_edit, name='orderitem_edit'),
     url(r'^find_delivery$', find_delivery, name='find_delivery'),
     url(r'^find_order$', find_order, name='find_order'),
+    url(r'^admin_check/(?P<order_id>[0-9]+)$', admin_check, name='admin_check'),
 ]
 

@@ -116,7 +116,8 @@ function addToOrder(e) {
     var price = form_tag.find(".price").val();
     var discount = form_tag.find(".discount").val();
     var quantity = form_tag.find(".quantity").val();
-    console.log(order_id, product_id, price, quantity);
+    var present = form_tag.find(".present").prop('checked');
+    console.log(order_id, product_id, price, quantity, present);
 
     if (!price) {
         alert('Укажите цену!!!!!!!!!!!');
@@ -129,6 +130,7 @@ function addToOrder(e) {
         price: price,
         discount: discount,
         quantity: quantity,
+        present: present,
         csrfmiddlewaretoken: document.getElementsByName('csrfmiddlewaretoken')[0].value
     };
 
@@ -165,7 +167,7 @@ function deleteFromOrder(e) {
         oi_id: oi_id
     };
 
-    url = "/delete_oi_from_order";
+    url = "/orderitem_delete";
 
     $.ajax({
         url: url,

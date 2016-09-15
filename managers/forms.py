@@ -7,6 +7,7 @@ from Feniks_CMS import settings
 
 User = get_user_model()
 
+
 class ProductForm(forms.ModelForm):
     class Meta:
         model = Product
@@ -20,9 +21,10 @@ class ProductForm(forms.ModelForm):
 class OrderForm(forms.ModelForm):
     class Meta:
         model = Order
-        fields = ['order_num', 'sale_date', 'customer_name', 'customer_addres', 'customer_phone', 'kredit']
+        fields = ['order_num', 'sale_date', 'customer_name', 'customer_addres', 'customer_phone', 'kredit', 'full_money_date']
         widgets = {
             'sale_date': forms.DateInput(attrs={'class': 'datepicker'}),
+            'full_money_date': forms.DateInput(attrs={'class': 'datepicker'}),
             'customer_addres': forms.Textarea(attrs={'rows': 3}),
         }
 
@@ -30,13 +32,25 @@ class OrderForm(forms.ModelForm):
 class OrderItemForm(forms.ModelForm):
     class Meta:
         model = OrderItem
-        fields = ['product', 'quantity', 'price', 'discount', 'present', 'supplier_invoice_date',
+        fields = ['product', 'quantity', 'price', 'discount', 'present', 'supplier_invoice_date', 'admin',
                   'supplier_delivered_date', 'delivery']
         widgets = {
             'supplier_invoice_date': forms.DateInput(attrs={'class': 'datepicker'}),
             'supplier_delivered_date': forms.DateInput(attrs={'class': 'datepicker'}),
             # 'customer_addres': forms.Textarea(attrs={'rows': 3}),
         }
+
+    def __init__(self, *args, **kwargs):
+        super(OrderItemForm, self).__init__(*args, **kwargs)
+        self.fields['admin'].queryset = User.objects.filter(role_admin=True)
+
+    def clean(self):
+        cleaned_data = super(OrderItemForm, self).clean()
+        if cleaned_data.get('supplier_invoice_date') and not cleaned_data.get('admin'):
+            raise forms.ValidationError(u"Укажите администратора, который сделал заказ у поставщика.")
+        if cleaned_data.get('admin') and not cleaned_data.get('supplier_invoice_date'):
+            raise forms.ValidationError(u"Укажите дату, когда был сделан заказ у поставщика.")
+        return cleaned_data
 
 
 class AdvanceMoneyForm(forms.ModelForm):

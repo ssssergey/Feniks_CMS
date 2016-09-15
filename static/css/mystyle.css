@@ -88,6 +88,10 @@ p, li {
     background-color: rgba(255, 69, 0, 0.52);
 }
 
+.alert-error {
+    background-color: rgba(255, 69, 0, 0.52);
+}
+
 .help-block {
     background-color: rgba(255, 69, 0, 0.52);
 }
@@ -127,6 +131,11 @@ p, li {
 tbody#product_list td.product_name {
     font-size: 1.2em;
     font-weight: 600;
+}
+
+.role_in_account {
+    text-align: center;
+    color: darkblue;
 }
 
 /*.hero-spacer {*/

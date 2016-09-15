@@ -11,7 +11,7 @@ from django.template.loader import render_to_string
 from django.views.generic import ListView, CreateView
 from uuslug import slugify
 
-from .forms import ProductForm, OrderForm, AdvanceMoneyForm, DeliveryForm
+from .forms import ProductForm, OrderForm, AdvanceMoneyForm, DeliveryForm, OrderItemForm
 from .models import Order, Product, Category, OrderItem, AdvanceMoney, Delivery
 
 
@@ -21,6 +21,9 @@ def index(request):
     limit_date = datetime(2016, 11, 1)
     if now > limit_date:
         raise Http404
+    if request.user.role_admin:
+        orders = Order.objects.filter(admin_check=False)
+        oi_list = OrderItem.objects.filter(order__admin_check=False)
     return render(request, "index.html", locals())
 
 
@@ -43,7 +46,7 @@ def order_create(request):
 @login_required
 def order_edit(request, order_id):
     order = get_object_or_404(Order, id=order_id)
-    if order.saler != request.user and not request.user.is_superuser:
+    if order.saler != request.user and not request.user.role_admin and not request.user.is_superuser:
         messages.warning(request, u'Вы не можете изменять этот договор, потому что не вы его заключали.')
         return HttpResponseRedirect(reverse('home'))
     form = OrderForm(instance=order)
@@ -90,7 +93,7 @@ def order_fill(request, order_id):
 
 
 @login_required
-def delete_oi_from_order(request):
+def orderitem_delete(request):
     oi_id = request.GET.get('oi_id')
     try:
         oi = OrderItem.objects.get(id=oi_id)
@@ -99,6 +102,19 @@ def delete_oi_from_order(request):
     except Exception as e:
         response = json.dumps({'success': 'False', 'html': str(e)})
     return HttpResponse(response, content_type='application/javascript; charset=utf-8')
+
+
+@login_required
+def orderitem_edit(request, id):
+    orderitem = get_object_or_404(OrderItem, id=id)
+    form = OrderItemForm(instance=orderitem)
+    if request.method == 'POST':
+        form = OrderItemForm(request.POST, instance=orderitem)
+        if form.is_valid():
+            form.save()
+            messages.info(request, u'Изменения приняты.')
+            return HttpResponseRedirect(reverse('home'))
+    return render(request, "orderitem_edit.html", locals())
 
 
 @login_required
@@ -127,6 +143,13 @@ def product_to_order(request):
     price = request.GET.get('price')
     discount = request.GET.get('discount')
     quantity = request.GET.get('quantity')
+    present = request.GET.get('present')
+    if present == 'true':
+        present = True
+    elif present == 'false':
+        present = False
+    else:
+        raise Http404
 
     order = Order.objects.get(id=int(order_id))
     product = Product.objects.get(id=int(product_id))
@@ -138,6 +161,7 @@ def product_to_order(request):
     if discount:
         order_item.discount = int(discount)
     order_item.quantity = int(quantity)
+    order_item.present = present
     order_item.save()
 
     template = "snippets/order_item_table_row.html"
@@ -289,3 +313,22 @@ def find_order(request):
         return render(request, "index.html", {})
     order_id = order.id
     return HttpResponseRedirect(reverse('order_detail', kwargs={'order_id': order_id}))
+
+
+@login_required
+def admin_check(request, order_id):
+    order = get_object_or_404(Order, id=order_id)
+    if not order.full_money_date:
+        messages.warning(request,
+                         u'Администратор, вы не можете пометить этот договор проверенным. Он не оплачен полостью.')
+        return HttpResponseRedirect(reverse('home'))
+    oi_list = OrderItem.objects.filter(order=order)
+    for oi in oi_list:
+        if not oi.supplier_delivered_date:
+            messages.warning(request,
+                             u'Администратор, вы не можете пометить этот договор проверенным. В этом договре остались не доставленные позиции.')
+            return HttpResponseRedirect(reverse('home'))
+    order.admin_check = True
+    order.save()
+    messages.warning(request, u'Подтверждение принято.')
+    return HttpResponseRedirect(reverse('home'))

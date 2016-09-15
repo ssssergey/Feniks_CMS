@@ -15,6 +15,80 @@ from managers.models import Order, OrderItem, AdvanceMoney, Delivery
 
 User = get_user_model()
 
+
+class WorkerMonthArchiveView(LoginRequiredMixin, MonthArchiveView):
+    queryset = Order.objects.all()
+    date_field = "sale_date"
+    template_name = 'accounts/workers_archive_month.html'
+    allow_empty = True
+    month_format = '%m'
+    ordering = 'sale_date'
+
+    def get_queryset(self):
+        qs = super(WorkerMonthArchiveView, self).get_queryset()
+        qs = qs.filter(saler__id=self.kwargs['user_id'])
+        return qs
+
+    def get_context_data(self, **kwargs):
+        context = super(WorkerMonthArchiveView, self).get_context_data(**kwargs)
+        user_id = self.kwargs['user_id']
+        user = get_object_or_404(User, id=user_id)
+        context['current_user'] = user
+
+        qs = context['object_list']
+
+        total = 0
+        for order in qs:
+            total += order.total
+        context['total'] = total
+        realiz_qs = qs.filter(full_money_date__isnull=False)
+
+        realiz_total = 0
+        for order in realiz_qs:
+            realiz_total += order.total
+        context['realiz_total'] = realiz_total
+        context['realiz_qs'] = realiz_qs
+
+        am_qs = AdvanceMoney.objects.filter(order__in=qs, order__saler__id=self.kwargs['user_id'])
+        am_total = 0
+        for am in am_qs:
+            am_total += am.advance_money
+        context['am_total'] = am_total
+        context['am_qs'] = am_qs
+
+        all_qs = self.get_queryset()
+        realiz_cashin_qs = all_qs.filter(full_money_date__month=self.get_month())
+
+        realiz_cashin_total = 0
+        for order in realiz_cashin_qs:
+            realiz_cashin_total += order.total
+        context['realiz_cashin_total'] = realiz_cashin_total
+        context['realiz_cashin_qs'] = realiz_cashin_qs
+
+        am_cashin_qs = AdvanceMoney.objects.filter(date__month=self.get_month(),
+                                                   order__saler__id=self.kwargs['user_id'])
+        am_cashin_total = 0
+        for am in am_cashin_qs:
+            am_cashin_total += am.advance_money
+        context['am_cashin_total'] = am_cashin_total
+        context['am_cashin_qs'] = am_cashin_qs
+
+        # Lifter
+        lifts = Delivery.objects.filter(lifter__id=self.kwargs['user_id'], date__month=self.get_month())
+        context['lifts'] = lifts
+
+        # Driver
+        drives = Delivery.objects.filter(lifter__id=self.kwargs['user_id'], date__month=self.get_month())
+        context['drives'] = drives
+
+        # Admin
+        admins = OrderItem.objects.filter(supplier_invoice_date__month=self.get_month(),
+                                          admin_id=self.kwargs['user_id'])
+        context['admins'] = admins
+
+        return context
+
+
 class SalerMonthArchiveView(LoginRequiredMixin, MonthArchiveView):
     queryset = Order.objects.all()
     date_field = "sale_date"
@@ -64,7 +138,6 @@ class SalerMonthArchiveView(LoginRequiredMixin, MonthArchiveView):
         context['realiz_cashin_total'] = realiz_cashin_total
         context['realiz_cashin_qs'] = realiz_cashin_qs
 
-
         am_cashin_qs = AdvanceMoney.objects.filter(date__month=self.get_month())
         am_cashin_total = 0
         for am in am_cashin_qs:
@@ -73,6 +146,7 @@ class SalerMonthArchiveView(LoginRequiredMixin, MonthArchiveView):
         context['am_cashin_qs'] = am_cashin_qs
 
         return context
+
 
 class LifterMonthArchiveView(LoginRequiredMixin, MonthArchiveView):
     queryset = Delivery.objects.all()
@@ -119,6 +193,7 @@ class DriverMonthArchiveView(LoginRequiredMixin, MonthArchiveView):
         context['driver_lifts'] = driver_lifts
         return context
 
+
 class AdminMonthArchiveView(LoginRequiredMixin, MonthArchiveView):
     queryset = OrderItem.objects.all()
     date_field = "supplier_invoice_date"
@@ -133,6 +208,7 @@ class AdminMonthArchiveView(LoginRequiredMixin, MonthArchiveView):
         context['current_user'] = user
 
         return context
+
 
 # def login_view(request):
 #     print(request.user.is_authenticated())
@@ -224,5 +300,3 @@ def saler(request, id):
         data.append(month_obj)
 
     return render_to_response("accounts/saler.html", locals(), context_instance=RequestContext(request))
-
-

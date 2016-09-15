@@ -7,7 +7,6 @@ from django.db import models
 from Feniks_CMS import settings
 
 
-
 ############### Категории ###############
 class ActiveCategoryManager(models.Manager):
     def get_query_set(self):
@@ -178,7 +177,8 @@ class ActiveDeliveryManager(models.Manager):
 class Delivery(models.Model):
     delivery_num = models.IntegerField(u'Номер доставки (реализации)', null=True, unique=True)
     date = models.DateField(u'Дата доставки', null=True)
-    lifter = models.ManyToManyField(settings.AUTH_USER_MODEL, verbose_name=u'Грузчик', related_name='lifter_user')
+    lifter = models.ManyToManyField(settings.AUTH_USER_MODEL, verbose_name=u'Грузчик', related_name='lifter_user',
+                                    blank=True, null=True)
     driver = models.ForeignKey(settings.AUTH_USER_MODEL, verbose_name=u'Водитель', related_name='driver_user',
                                null=True)
     addres = models.TextField(u'Адрес доставки', blank=True, null=True)
@@ -215,6 +215,8 @@ class OrderItem(models.Model):
     present = models.BooleanField(u'Наличие', default=False)
     # Заказ у поставщика
     supplier_invoice_date = models.DateField(u'Дата заказа у поставщика', blank=True, null=True)
+    admin = models.ForeignKey(settings.AUTH_USER_MODEL, verbose_name=u'Администратор', related_name='admin_user',
+                              null=True, blank=True)
     supplier_delivered_date = models.DateField(u'Дата получения от поставщика', blank=True, null=True)
     # Отгрузка
     delivery = models.ForeignKey(Delivery, verbose_name=u'Доставка', blank=True, null=True)

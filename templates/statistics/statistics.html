@@ -26,25 +26,25 @@
         <div class="col-sm-3" align="center">
             <h2>Менеджеры</h2>
             {% for saler in salers %}
-                <p><a href="{% url 'saler_account' year=now.year month=now.month user_id=saler.id %}">{{ saler.fullname }}</a></p>
+                <p><a href="{% url 'worker_account' year=now.year month=now.month user_id=saler.id %}">{{ saler.fullname }}</a></p>
             {% endfor %}
         </div>
         <div class="col-sm-3" align="center">
             <h2>Грузчики</h2>
             {% for lifter in lifters %}
-                <p><a href="{% url 'lifter_account' year=now.year month=now.month user_id=lifter.id %}">{{ lifter.fullname }}</a></p>
+                <p><a href="{% url 'worker_account' year=now.year month=now.month user_id=lifter.id %}">{{ lifter.fullname }}</a></p>
             {% endfor %}
         </div>
         <div class="col-sm-3" align="center">
             <h2>Водители</h2>
             {% for driver in drivers %}
-                <p><a href="{% url 'driver_account' year=now.year month=now.month user_id=driver.id %}">{{ driver.fullname }}</a></p>
+                <p><a href="{% url 'worker_account' year=now.year month=now.month user_id=driver.id %}">{{ driver.fullname }}</a></p>
             {% endfor %}
         </div>
         <div class="col-sm-3" align="center">
             <h2>Администраторы</h2>
             {% for admin in admins %}
-                <p><a href="{% url 'admin_account' year=now.year month=now.month user_id=admin.id %}">{{ admin.fullname }}</a></p>
+                <p><a href="{% url 'worker_account' year=now.year month=now.month user_id=admin.id %}">{{ admin.fullname }}</a></p>
             {% endfor %}
         </div>
     </div>

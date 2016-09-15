@@ -1,0 +1,26 @@
+{% load humanize %}
+
+<table class="table table-striped table-responsive">
+    <thead>
+    <tr>
+        <th>Наименование товара</th>
+        <th>Кол-во</th>
+        <th>Договор</th>
+        <th>Дата заказ у поставщика</th>
+        <th>Дата получения от поставщика</th>
+        <th></th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for oi in oi_list %}
+        <tr>
+            <td>{{ oi.name }}</td>
+            <td>{{ oi.quantity }}</td>
+            <td>{{ oi.order }}</td>
+            <td>{{ oi.supplier_invoice_date }}</td>
+            <td>{{ oi.supplier_delivered_date }}</td>
+            <td><a href="{% url 'orderitem_edit' id=oi.id %}">Изменить</a></td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>

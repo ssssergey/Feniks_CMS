@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% load humanize %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-sm-12">
+            <h1 align="right">{{ current_user.fullname }}</h1>
+            <hr>
+            <h1>{{ month|date:'F Y' }}</h1>
+            {% if object_list or am_qs or realiz_qs or realiz_cashin_qs or am_cashin_qs %}
+                <hr>
+                <h1 class="role_in_account">Менеджер</h1>
+                <h2>1. Общая сумма продаж в этом месяце: {{ total|intcomma }} рублей.</h2>
+                {% include 'snippets/table_of_orders.html' with orders=object_list %}
+                <hr>
+                <h2>2. Реализовано из проданного в этом месяце на сумму: {{ realiz_total|intcomma }} рублей.</h2>
+                {% include 'snippets/table_of_orders.html' with orders=realiz_qs %}
+                <hr>
+                <h2>3. Сумма задатков по продажам в этом месяце: {{ am_total|intcomma }} рублей.</h2>
+                {% for am in am_qs %}
+                    <p>{{ am.date }} - {{ am.order }} - {{ am.advance_money }} рублей.</p>
+                {% endfor %}
+                <hr>
+                <h2>4. Реализовано в этом месяце на сумму: {{ realiz_cashin_total|intcomma }} рублей.</h2>
+                {% include 'snippets/table_of_orders.html' with orders=realiz_cashin_qs %}
+                <hr>
+                <h2>5. Сумма задатков, полученных в этом месяце: {{ am_cashin_total|intcomma }} рублей.</h2>
+                {% for am in am_cashin_qs %}
+                    <p>{{ am.date }} - {{ am.order }} - {{ am.advance_money }} рублей.</p>
+                {% endfor %}
+            {% endif %}
+            {% if admins %}
+                <hr style="height: 5px; background-color: black; margin: 50px 0">
+                <h1 class="role_in_account">Администратор</h1>
+                <h2>1. Заказы у поставщиков: {{ admins|length }}.</h2>
+                <table class="table table-striped table-responsive">
+                    <thead>
+                    <tr>
+                        <th></th>
+                        <th>Товар</th>
+                        <th>Договор</th>
+                        <th>Дата заказ у поставшика</th>
+                        <th>Дата получения от поставщика</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for oi in admins %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td>{{ oi.product }}</td>
+                            <td>{{ oi.order }}</td>
+                            <td>{{ oi.supplier_invoice_date }}</td>
+                            <td>{{ oi.supplier_delivered_date }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            {% endif %}
+            {% if lifts %}
+                <hr style="height: 5px; background-color: black; margin: 50px 0">
+                <h1 class="role_in_account">Грузчик</h1>
+                <h2>1. Общее количество погрузок: {{ lifts|length }}.</h2>
+                {% for delivery in lifts %}
+                    <p>{{ forloop.counter }}. {{ delivery }} - {{ delivery.date }} - Этажи:{{ delivery.stores }}</p>
+                {% endfor %}
+            {% endif %}
+            {% if drives %}
+                <hr style="height: 5px; background-color: black; margin: 50px 0">
+                <h1 class="role_in_account">Водитель</h1>
+                <h2>1. Общее количество доставок: {{ drives|length }}.</h2>
+                {% for delivery in drives %}
+                    <p>{{ forloop.counter }}. {{ delivery }} - {{ delivery.date }}</p>
+                {% endfor %}
+            {% endif %}
+            <hr>
+        </div>
+    </div>
+{% endblock %}
+
+{% block footer %}
+    <p>
+        {% if previous_month %}
+            <a href="{% url 'worker_account' user_id=current_user.id year=previous_month.year month=previous_month.month %}">Предыдущий
+                месяц: {{ previous_month|date:"F Y" }}</a>
+        {% endif %}
+        {% if previous_month and next_month %}-|-{% endif %}
+        {% if next_month %}
+            <a href="{% url 'worker_account' user_id=current_user.id year=next_month.year month=next_month.month %}">
+                Следующий месяц: {{ next_month|date:"F Y" }}
+            </a>
+        {% endif %}
+    </p>
+{% endblock %}
