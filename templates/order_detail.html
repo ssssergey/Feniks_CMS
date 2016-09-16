@@ -20,7 +20,7 @@
                     <p class="not_done">Полностью не оплачено</p>
                 {% endif %}
                 {% if order.admin_check %}
-                    <p class="done">Проверено администратором: {{ order.admin_who_checked }}</p>
+                    <p class="done">Проверено администратором: {{ order.admin_who_checked.fullname }}</p>
                 {% else %}
                     <p class="not_done">Администратор не проверил</p>
                 {% endif %}

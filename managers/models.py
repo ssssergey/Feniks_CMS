@@ -185,9 +185,7 @@ class Delivery(models.Model):
     driver = models.ForeignKey(settings.AUTH_USER_MODEL, verbose_name=u'Водитель', related_name='driver_user',
                                blank=True, null=True)
     addres = models.TextField(u'Адрес доставки', blank=True, null=True)
-    zone = models.CharField(u'Зона', max_length=150, choices=((u'город', u'город'), (u'регион', u'регион')))
     stores = models.IntegerField(u'Этажи', blank=True, null=True)
-    assembly = models.IntegerField(u'Стоимость сборки', blank=True, null=True)
     is_active = models.BooleanField(u'Активно', default=True)
     objects = models.Manager()
     active = ActiveDeliveryManager()

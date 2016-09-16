@@ -68,7 +68,7 @@ class AdvanceMoneyForm(forms.ModelForm):
 class DeliveryForm(forms.ModelForm):
     class Meta:
         model = Delivery
-        fields = ['delivery_num', 'date', 'selfdrive', 'driver', 'lifter', 'addres', 'zone', 'stores']
+        fields = ['delivery_num', 'date', 'selfdrive', 'driver', 'lifter', 'addres', 'stores']
         widgets = {
             'date': forms.DateInput(attrs={'class': 'datepicker'}),
             'lifter': forms.CheckboxSelectMultiple(),

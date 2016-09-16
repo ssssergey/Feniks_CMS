@@ -517,5 +517,5 @@ def admin_check(request, order_id):
     order.admin_check = True
     order.admin_who_checked = request.user
     order.save()
-    messages.warning(request, u'Подтверждение принято.')
+    messages.info(request, u'Подтверждение принято.')
     return HttpResponseRedirect(reverse('home'))
