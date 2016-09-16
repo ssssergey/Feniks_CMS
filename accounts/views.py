@@ -49,7 +49,8 @@ class WorkerMonthArchiveView(LoginRequiredMixin, MonthArchiveView):
         context['realiz_total'] = realiz_total
         context['realiz_qs'] = realiz_qs
 
-        am_qs = AdvanceMoney.objects.filter(order__in=qs, order__saler__id=self.kwargs['user_id'])
+        am_qs = AdvanceMoney.objects.filter(order__in=qs, order__saler__id=self.kwargs['user_id'],
+                                            order__full_money_date__isnull=True)
         am_total = 0
         for am in am_qs:
             am_total += am.advance_money
@@ -66,7 +67,8 @@ class WorkerMonthArchiveView(LoginRequiredMixin, MonthArchiveView):
         context['realiz_cashin_qs'] = realiz_cashin_qs
 
         am_cashin_qs = AdvanceMoney.objects.filter(date__month=self.get_month(),
-                                                   order__saler__id=self.kwargs['user_id'])
+                                                   order__saler__id=self.kwargs['user_id'],
+                                                   order__full_money_date__isnull=True)
         am_cashin_total = 0
         for am in am_cashin_qs:
             am_cashin_total += am.advance_money

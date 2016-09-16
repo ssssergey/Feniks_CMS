@@ -5,11 +5,12 @@
     <div class="row" ng-app="appProducts">
         <div class="col-sm-6" ng-controller="ProductsCtrl" ng-init="initialize('Ready')">
             <h2 align="center">Номенклатура товаров для добавления в договор</h2>
-            <div class="form-inline searching">
+            <div class="form-inline searching" align="center">
                 <label for="search">Поиск: </label>
                 <input ng-model="query" type="text" class="form-control" id="search"/>
             </div>
-            <table class="table">
+            <hr>
+            <table class="table table-responsive">
                 <thead>
                 <tr>
                     <th>Товар</th>
@@ -18,7 +19,7 @@
                 </thead>
                 <tbody id="product_list">
                 <tr ng-repeat="item in items | filter: query">
-                    <td class="product_name">[[ item.name ]]</td>
+                    <td class="product_name" style="max-width: 10vw">[[ item.name ]]</td>
                     <td>
                         <form class="form-horizontal">
                             <div class="row">
@@ -34,7 +35,7 @@
                                            size="2" class="quantity " maxlength="5" required/><br>
                                     <label for="quantity">В наличии</label>
                                     <input type="checkbox" name="present" value="true"
-                                           class="present "/><br>
+                                           class="present"/><br>
                                     <input type="hidden" name="product_id" class="product_id" value="[[ item.id ]]"/>
                                 </div>
                                 <div class="col-sm-6">
@@ -85,7 +86,9 @@
                 </table>
             </div>
             <hr>
-            <a class="btn btn-warning btn-lg" href="{% url 'order_detail' pk=order.id %}">Готово</a>
+            <div align="center">
+                <a class="btn btn-warning btn-lg" href="{% url 'order_detail' pk=order.id %}">Готово</a>
+            </div>
         </div>
 
     </div>

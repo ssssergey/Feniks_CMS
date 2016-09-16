@@ -1,7 +1,40 @@
 {% extends "base.html" %}
+{% load humanize %}
 
 {% block content %}
-    <div class="row">
+    <style>
+        body {
+            background-color: #F5F5F5;
+        }
+    </style>
+    <div class="row" style="background-color: #F5F5F5; padding: 20px 0">
+        <div class="col-sm-12" align="center">
+            <div id="accordion" role="tablist" aria-multiselectable="true">
+                <div class="panel panel-default">
+                    <div class="panel-heading" role="tab" id="headingOne">
+                        <h4 class="panel-title">
+                            <a class="collapsed" data-toggle="collapse" data-parent="#accordion" href="#collapseOne"
+                               aria-expanded="true"
+                               aria-controls="collapseOne">
+                                <h3>Общая сумма задатков в кассе без реализации: {{ am_total | intcomma }} рублей</h3>
+                            </a>
+                        </h4>
+                    </div>
+                    <div id="collapseOne" class="panel-collapse collapse" role="tabpanel"
+                         aria-labelledby="headingOne">
+                        <ul class="list-group">
+                            {% for am in am_qs_all %}
+                                <li class="list-group-item">{{ forloop.counter }}. | {{ am.order }}
+                                    | {{ am.advance_money | intcomma }} руб. | {{ am.date }}
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row" style="background-color: rgba(42, 171, 210, 0.61); padding: 20px 0">
         <div class="col-sm-12" align="center">
             <h1>Статистика за периоды:</h1>
         </div>
@@ -18,33 +51,40 @@
                 месяц</a>
         </div>
     </div>
-    <hr>
-    <div class="row">
+    <div class="row" style="background-color: rgba(210, 146, 95, 0.61); padding: 20px 0">
         <div class="col-sm-12" align="center">
             <h1>Статистика по персоналу:</h1>
         </div>
         <div class="col-sm-3" align="center">
             <h2>Менеджеры</h2>
             {% for saler in salers %}
-                <p><a href="{% url 'worker_account' year=now.year month=now.month user_id=saler.id %}">{{ saler.fullname }}</a></p>
+                <p>
+                    <a href="{% url 'worker_account' year=now.year month=now.month user_id=saler.id %}">{{ saler.fullname }}</a>
+                </p>
             {% endfor %}
         </div>
         <div class="col-sm-3" align="center">
             <h2>Грузчики</h2>
             {% for lifter in lifters %}
-                <p><a href="{% url 'worker_account' year=now.year month=now.month user_id=lifter.id %}">{{ lifter.fullname }}</a></p>
+                <p>
+                    <a href="{% url 'worker_account' year=now.year month=now.month user_id=lifter.id %}">{{ lifter.fullname }}</a>
+                </p>
             {% endfor %}
         </div>
         <div class="col-sm-3" align="center">
             <h2>Водители</h2>
             {% for driver in drivers %}
-                <p><a href="{% url 'worker_account' year=now.year month=now.month user_id=driver.id %}">{{ driver.fullname }}</a></p>
+                <p>
+                    <a href="{% url 'worker_account' year=now.year month=now.month user_id=driver.id %}">{{ driver.fullname }}</a>
+                </p>
             {% endfor %}
         </div>
         <div class="col-sm-3" align="center">
             <h2>Администраторы</h2>
             {% for admin in admins %}
-                <p><a href="{% url 'worker_account' year=now.year month=now.month user_id=admin.id %}">{{ admin.fullname }}</a></p>
+                <p>
+                    <a href="{% url 'worker_account' year=now.year month=now.month user_id=admin.id %}">{{ admin.fullname }}</a>
+                </p>
             {% endfor %}
         </div>
     </div>

@@ -9,6 +9,7 @@ from managers.models import Order, AdvanceMoney
 
 User = get_user_model()
 
+
 @user_passes_test(lambda u: u.is_superuser)
 def statistics(request):
     now = datetime.now()
@@ -16,6 +17,10 @@ def statistics(request):
     lifters = User.objects.filter(role_lifter=True)
     drivers = User.objects.filter(role_driver=True)
     admins = User.objects.filter(role_admin=True)
+    am_qs_all = AdvanceMoney.objects.filter(order__full_money_date__isnull=True)
+    am_total = 0
+    for am in am_qs_all:
+        am_total += am.advance_money
     return render(request, "statistics/statistics.html", locals())
 
 
@@ -46,7 +51,8 @@ class OrderMonthArchiveView(MonthArchiveView):
         context['realiz_total'] = realiz_total
         context['realiz_qs'] = realiz_qs
 
-        am_qs = AdvanceMoney.objects.filter(order__in=qs)
+        am_qs = AdvanceMoney.objects.filter(order__in=qs,
+                                            order__full_money_date__isnull=True)
         am_total = 0
         for am in am_qs:
             am_total += am.advance_money
@@ -62,8 +68,8 @@ class OrderMonthArchiveView(MonthArchiveView):
         context['realiz_cashin_total'] = realiz_cashin_total
         context['realiz_cashin_qs'] = realiz_cashin_qs
 
-
-        am_cashin_qs = AdvanceMoney.objects.filter(date__month=self.get_month())
+        am_cashin_qs = AdvanceMoney.objects.filter(date__month=self.get_month(),
+                                                   order__full_money_date__isnull=True)
         am_cashin_total = 0
         for am in am_cashin_qs:
             am_cashin_total += am.advance_money
@@ -71,6 +77,7 @@ class OrderMonthArchiveView(MonthArchiveView):
         context['am_cashin_qs'] = am_cashin_qs
 
         return context
+
 
 class OrderWeekArchiveView(WeekArchiveView):
     queryset = Order.objects.all()
