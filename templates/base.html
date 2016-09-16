@@ -11,6 +11,8 @@
     <link href="/static/css/bootstrap-datepicker.css" rel="stylesheet">
     <link href="/static/css/font-awesome.min.css" rel="stylesheet">
     <link href="/static/css/mystyle.css" rel="stylesheet">
+    <script src="/static/js/angular.min.js"></script>
+    <script src="/static/js/app.js"></script>
 </head>
 <body>
 {% if messages %}
@@ -51,16 +53,16 @@
                     <li>
                         {% now "Y" as current_year %}
                         {% now "m" as current_month %}
-{#                        {% if request.user.role_saler %}#}
-{#                            {% url 'saler_account' year=current_year month=current_month user_id=request.user.id as url_saler %}#}
-{#                        {% elif request.user.role_driver %}#}
-{#                            {% url 'driver_account' year=current_year month=current_month user_id=request.user.id as url_saler %}#}
-{#                        {% elif request.user.role_lifter %}#}
-{#                            {% url 'lifter_account' year=current_year month=current_month user_id=request.user.id as url_saler %}#}
-{#                        {% elif request.user.role_admin %}#}
-{#                            {% url 'admin_account' year=current_year month=current_month user_id=request.user.id as url_saler %}#}
-{#                        {% endif %}#}
-                    {% url 'worker_account' year=current_year month=current_month user_id=request.user.id as url_saler %}
+                        {#                        {% if request.user.role_saler %}#}
+                        {#                            {% url 'saler_account' year=current_year month=current_month user_id=request.user.id as url_saler %}#}
+                        {#                        {% elif request.user.role_driver %}#}
+                        {#                            {% url 'driver_account' year=current_year month=current_month user_id=request.user.id as url_saler %}#}
+                        {#                        {% elif request.user.role_lifter %}#}
+                        {#                            {% url 'lifter_account' year=current_year month=current_month user_id=request.user.id as url_saler %}#}
+                        {#                        {% elif request.user.role_admin %}#}
+                        {#                            {% url 'admin_account' year=current_year month=current_month user_id=request.user.id as url_saler %}#}
+                        {#                        {% endif %}#}
+                        {% url 'worker_account' year=current_year month=current_month user_id=request.user.id as url_saler %}
                         <a href="{{ url_saler }}"><i class="fa fa-user fa-lg"
                                                      aria-hidden="true"></i>&nbsp;{{ user.fullname }}
                         </a>
@@ -92,6 +94,7 @@
     {% block footer %}
     {% endblock %}
 </footer>
+
 
 <script src="/static/js/jquery.js"></script>
 <script src="/static/js/bootstrap.min.js"></script>

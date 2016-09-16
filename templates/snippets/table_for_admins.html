@@ -6,7 +6,7 @@
         <th>Наименование товара</th>
         <th>Кол-во</th>
         <th>Договор</th>
-        <th>Дата заказ у поставщика</th>
+        <th>Дата заказа у поставщика</th>
         <th>Дата получения от поставщика</th>
         <th></th>
     </tr>
@@ -17,8 +17,20 @@
             <td>{{ oi.name }}</td>
             <td>{{ oi.quantity }}</td>
             <td>{{ oi.order }}</td>
-            <td>{{ oi.supplier_invoice_date }}</td>
-            <td>{{ oi.supplier_delivered_date }}</td>
+            <td>
+                {% if oi.supplier_invoice_date %}
+                    {{ oi.supplier_invoice_date }}
+                {% else %}
+                    -
+                {% endif %}
+            </td>
+            <td>
+                {% if oi.supplier_delivered_date %}
+                    {{ oi.supplier_delivered_date }}
+                {% else %}
+                    -
+                {% endif %}
+            </td>
             <td><a href="{% url 'orderitem_edit' pk=oi.id %}">Изменить</a></td>
         </tr>
     {% endfor %}

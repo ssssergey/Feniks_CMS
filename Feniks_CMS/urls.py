@@ -11,6 +11,7 @@ urlpatterns = [
     url(r'^', include('managers.urls')),
     url(r'^', include('statistics.urls')),
     url(r'^$', index, name='home'),
+    url(r'^api/', include('managers.api.urls', namespace="api")),
 ]
 
 admin.site.site_header = u'"Феникс" - зарплаты'

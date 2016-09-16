@@ -497,8 +497,7 @@ def find_order(request):
     except:
         messages.warning(request, u'Договора №{} не существует.'.format(order_num))
         return render(request, "index.html", {})
-    order_id = order.id
-    return HttpResponseRedirect(reverse('order_detail', kwargs={'pk': order_id}))
+    return HttpResponseRedirect(reverse('order_detail', kwargs={'pk': order.id}))
 
 
 @login_required
