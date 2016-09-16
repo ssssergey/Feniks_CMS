@@ -29,20 +29,38 @@ def index(request):
     return render(request, "index.html", locals())
 
 
-@login_required
-def order_create(request):
-    form = OrderForm()
-    if request.method == "POST":
-        form = OrderForm(request.POST)
-        if form.is_valid():
-            obj = form.save()
-            obj.saler = request.user
-            obj.save()
-            order_id = obj.id
-            order_num = request.POST.get('order_num')
-            messages.info(request, u'Договор №{} создан. Теперь добавьте укажите товары.'.format(order_num))
-            return HttpResponseRedirect(reverse('order_fill', kwargs={'order_id': order_id}))
-    return render(request, "order_create.html", locals())
+class OrderCreate(LoginRequiredMixin, CreateView):
+    model = Order
+    form_class = OrderForm
+    template_name = "order_create.html"
+
+    def get_success_url(self):
+        return reverse('order_fill', args=(self.get_object().id,))
+
+    def form_valid(self, form):
+        obj = form.save()
+        obj.saler = self.request.user
+        obj.save()
+        order_id = obj.id
+        order_num = obj.order_num
+        messages.info(self.request, u'Договор №{} создан. Теперь добавьте укажите товары.'.format(order_num))
+        return HttpResponseRedirect(reverse('order_fill', kwargs={'order_id': order_id}))
+
+
+# @login_required
+# def order_create(request):
+#     form = OrderForm()
+#     if request.method == "POST":
+#         form = OrderForm(request.POST)
+#         if form.is_valid():
+#             obj = form.save()
+#             obj.saler = request.user
+#             obj.save()
+#             order_id = obj.id
+#             order_num = request.POST.get('order_num')
+#             messages.info(request, u'Договор №{} создан. Теперь добавьте укажите товары.'.format(order_num))
+#             return HttpResponseRedirect(reverse('order_fill', kwargs={'order_id': order_id}))
+#     return render(request, "order_create.html", locals())
 
 
 @login_required
@@ -67,7 +85,7 @@ def order_list(request):
     return render(request, "order_list.html", locals())
 
 
-class OrderDetail(DetailView):
+class OrderDetail(LoginRequiredMixin, DetailView):
     model = Order
     template_name = "order_detail.html"
 
@@ -184,27 +202,50 @@ def product_to_order(request):
 
 
 ######################### Advance Money ##########################
-@login_required
-def advance_money_create(request):
-    form = AdvanceMoneyForm()
-    if request.method == "POST":
-        form = AdvanceMoneyForm(request.POST)
-        if form.is_valid():
-            order_num = request.POST.get('order_num')
-            try:
-                order = Order.objects.get(order_num=order_num)
-                obj = form.save(commit=False)
-                obj.order = order
-                obj.save()
-                messages.info(request, u'Задаток для Договора №{} добавлен.'.format(order_num))
-                return HttpResponseRedirect(reverse('home'))
-            except:
-                form.add_error('order_num', u'Договора №{} не существует.'.format(order_num))
-                messages.warning(request, u'Договора №{} не существует.'.format(order_num))
-    return render(request, "advance_money_create.html", locals())
+class AdvanceMoneyCreate(LoginRequiredMixin, CreateView):
+    model = AdvanceMoney
+    form_class = AdvanceMoneyForm
+    template_name = "advance_money_create.html"
+
+    def get_success_url(self):
+        return reverse('home')
+
+    def form_valid(self, form):
+        order_num = self.request.POST.get('order_num')
+        try:
+            order = Order.objects.get(order_num=order_num)
+            obj = form.save(commit=False)
+            obj.order = order
+            obj.save()
+            messages.info(self.request, u'Задаток для Договора №{} добавлен.'.format(order_num))
+            return HttpResponseRedirect(reverse('home'))
+        except:
+            form.add_error('order_num', u'Договора №{} не существует.'.format(order_num))
+            messages.warning(self.request, u'Договора №{} не существует.'.format(order_num))
+            return render(self.request, "advance_money_create.html", locals())
 
 
-class AdvanceMoneyDetail(DetailView):
+# @login_required
+# def advance_money_create(request):
+#     form = AdvanceMoneyForm()
+#     if request.method == "POST":
+#         form = AdvanceMoneyForm(request.POST)
+#         if form.is_valid():
+#             order_num = request.POST.get('order_num')
+#             try:
+#                 order = Order.objects.get(order_num=order_num)
+#                 obj = form.save(commit=False)
+#                 obj.order = order
+#                 obj.save()
+#                 messages.info(request, u'Задаток для Договора №{} добавлен.'.format(order_num))
+#                 return HttpResponseRedirect(reverse('home'))
+#             except:
+#                 form.add_error('order_num', u'Договора №{} не существует.'.format(order_num))
+#                 messages.warning(request, u'Договора №{} не существует.'.format(order_num))
+#     return render(request, "advance_money_create.html", locals())
+
+
+class AdvanceMoneyDetail(LoginRequiredMixin, DetailView):
     model = AdvanceMoney
     template_name = "advance_money_detail.html"
 
@@ -213,6 +254,7 @@ class AdvanceMoneyDetail(DetailView):
         object = self.get_object()
         context['page_title'] = u'Задаток №{}'.format(object.id)
         return context
+
 
 # @login_required
 # def advance_money_detail(request, id):
@@ -234,21 +276,38 @@ def advance_money_edit(request, id):
 
 
 ######################## Delivery #############################
-@login_required
-def delivery_create(request):
-    form = DeliveryForm()
-    if request.method == "POST":
-        form = DeliveryForm(request.POST)
-        if form.is_valid():
-            obj = form.save()
-            delivery_id = obj.id
-            delivery_num = request.POST.get('delivery_num')
-            messages.info(request, u'Доставка №{} создана. Теперь добавьте укажите товары.'.format(delivery_num))
-            # return render(request, "delivery_fill.html", locals())
-            return HttpResponseRedirect(reverse('delivery_fill', kwargs={'id': delivery_id}))
-    return render(request, "delivery_create.html", locals())
+class DeliveryCreate(LoginRequiredMixin, CreateView):
+    model = Delivery
+    form_class = DeliveryForm
+    template_name = "delivery_create.html"
 
-class DeliveryDetail(DetailView):
+    def get_success_url(self):
+        return reverse('delivery_fill', args=(self.get_object().id,))
+
+    def form_valid(self, form):
+        obj = form.save()
+        delivery_id = obj.id
+        delivery_num = obj.delivery_num
+        messages.info(self.request, u'Доставка №{} создана. Теперь добавьте укажите товары.'.format(delivery_num))
+        return HttpResponseRedirect(reverse('delivery_fill', kwargs={'id': delivery_id}))
+
+
+# @login_required
+# def delivery_create(request):
+#     form = DeliveryForm()
+#     if request.method == "POST":
+#         form = DeliveryForm(request.POST)
+#         if form.is_valid():
+#             obj = form.save()
+#             delivery_id = obj.id
+#             delivery_num = request.POST.get('delivery_num')
+#             messages.info(request, u'Доставка №{} создана. Теперь добавьте укажите товары.'.format(delivery_num))
+#             # return render(request, "delivery_fill.html", locals())
+#             return HttpResponseRedirect(reverse('delivery_fill', kwargs={'id': delivery_id}))
+#     return render(request, "delivery_create.html", locals())
+
+
+class DeliveryDetail(LoginRequiredMixin, DetailView):
     model = Delivery
     template_name = "delivery_detail.html"
 

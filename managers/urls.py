@@ -5,7 +5,7 @@ from django.conf.urls import url
 from managers.views import *
 
 urlpatterns = [
-    url(r'^order_create$', order_create, name='order_create'),
+    url(r'^order_create$', OrderCreate.as_view(), name='order_create'),
     url(r'^order_edit/(?P<order_id>[0-9]+)$', order_edit, name='order_edit'),
     url(r'^order_delete/(?P<order_id>[0-9]+)$', order_delete, name='order_delete'),
     url(r'^order_list$', order_list, name='order_list'),
@@ -13,10 +13,10 @@ urlpatterns = [
     url(r'^order_fill/(?P<order_id>[0-9]+)$', order_fill, name='order_fill'),
     url(r'^product_create$', product_create, name='product_create'),
     url(r'^product_to_order$', product_to_order, name='product_to_order'),
-    url(r'^advance_money_create$', advance_money_create, name='advance_money_create'),
+    url(r'^advance_money_create$', AdvanceMoneyCreate.as_view(), name='advance_money_create'),
     url(r'^advance_money_detail/(?P<pk>[0-9]+)$', AdvanceMoneyDetail.as_view(), name='advance_money_detail'),
     url(r'^advance_money_edit/(?P<id>[0-9]+)$', advance_money_edit, name='advance_money_edit'),
-    url(r'^delivery_create$', delivery_create, name='delivery_create'),
+    url(r'^delivery_create$', DeliveryCreate.as_view(), name='delivery_create'),
     url(r'^delivery_detail/(?P<pk>[0-9]+)$', DeliveryDetail.as_view(), name='delivery_detail'),
     url(r'^delivery_edit/(?P<id>[0-9]+)$', delivery_edit, name='delivery_edit'),
     url(r'^delivery_fill/(?P<id>[0-9]+)$', delivery_fill, name='delivery_fill'),
