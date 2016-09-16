@@ -41,7 +41,6 @@ class OrderCreate(LoginRequiredMixin, CreateView):
         obj = form.save()
         obj.saler = self.request.user
         obj.save()
-        order_id = obj.id
         order_num = obj.order_num
         messages.info(self.request, u'Договор №{} создан. Теперь добавьте укажите товары.'.format(order_num))
         return HttpResponseRedirect(self.get_success_url())
@@ -75,6 +74,7 @@ class OrderEdit(LoginRequiredMixin, UpdateView):
         if order.saler != self.request.user and not self.request.user.role_admin and not self.request.user.is_superuser:
             messages.warning(self.request, u'Вы не можете изменять этот договор, потому что не вы его заключали.')
             return HttpResponseRedirect(reverse('home'))
+        form.save()
         return HttpResponseRedirect(self.get_success_url())
 
 
@@ -510,11 +510,12 @@ def admin_check(request, order_id):
         return HttpResponseRedirect(reverse('home'))
     oi_list = OrderItem.objects.filter(order=order)
     for oi in oi_list:
-        if not oi.supplier_delivered_date:
+        if not oi.delivery:
             messages.warning(request,
                              u'Администратор, вы не можете пометить этот договор проверенным. В этом договре остались не доставленные позиции.')
             return HttpResponseRedirect(reverse('home'))
     order.admin_check = True
+    order.admin_who_checked = request.user
     order.save()
     messages.warning(request, u'Подтверждение принято.')
     return HttpResponseRedirect(reverse('home'))

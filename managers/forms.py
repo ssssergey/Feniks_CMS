@@ -21,7 +21,8 @@ class ProductForm(forms.ModelForm):
 class OrderForm(forms.ModelForm):
     class Meta:
         model = Order
-        fields = ['order_num', 'sale_date', 'customer_name', 'customer_addres', 'customer_phone', 'kredit', 'full_money_date']
+        fields = ['order_num', 'sale_date', 'customer_name', 'customer_addres', 'customer_phone', 'kredit',
+                  'delivery_money', 'full_money_date']
         widgets = {
             'sale_date': forms.DateInput(attrs={'class': 'datepicker'}),
             'full_money_date': forms.DateInput(attrs={'class': 'datepicker'}),
@@ -33,7 +34,7 @@ class OrderItemForm(forms.ModelForm):
     class Meta:
         model = OrderItem
         fields = ['product', 'quantity', 'price', 'discount', 'present', 'supplier_invoice_date', 'admin',
-                  'supplier_delivered_date', 'delivery']
+                  'supplier_delivered_date']
         widgets = {
             'supplier_invoice_date': forms.DateInput(attrs={'class': 'datepicker'}),
             'supplier_delivered_date': forms.DateInput(attrs={'class': 'datepicker'}),
@@ -67,7 +68,7 @@ class AdvanceMoneyForm(forms.ModelForm):
 class DeliveryForm(forms.ModelForm):
     class Meta:
         model = Delivery
-        fields = ['delivery_num', 'date', 'selfdrive', 'driver', 'lifter', 'addres', 'zone', 'stores', 'assembly']
+        fields = ['delivery_num', 'date', 'selfdrive', 'driver', 'lifter', 'addres', 'zone', 'stores']
         widgets = {
             'date': forms.DateInput(attrs={'class': 'datepicker'}),
             'lifter': forms.CheckboxSelectMultiple(),

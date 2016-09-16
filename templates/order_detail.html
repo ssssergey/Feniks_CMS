@@ -20,7 +20,7 @@
                     <p class="not_done">Полностью не оплачено</p>
                 {% endif %}
                 {% if order.admin_check %}
-                    <p class="done">Администратор проверил</p>
+                    <p class="done">Проверено администратором: {{ order.admin_who_checked }}</p>
                 {% else %}
                     <p class="not_done">Администратор не проверил</p>
                 {% endif %}
@@ -28,6 +28,11 @@
                     <p class="done">Бухгалтер проверил</p>
                 {% else %}
                     <p class="not_done">Бухгалтер не проверил</p>
+                {% endif %}
+                {% if order.delivery_money %}
+                    <p>Стоимость доставки: {{ order.delivery_money }} рублей</p>
+                {% else %}
+                    <p>Стоимость доставки: нет.</p>
                 {% endif %}
                 {% if order.advancemoney_set.all %}
                     <h3>Задатки: {{ order.total_advance_money }} рублей</h3>
@@ -87,7 +92,7 @@
             <hr>
             <a class="btn btn-warning btn-lg" href="{% url 'order_edit' pk=order.id %}">Изменить</a>
             {% if request.user.role_admin %}
-                <a class="btn btn-info btn-lg" href="{% url 'admin_check' order_id=order.id %}">Проверено</a>
+                <a class="btn btn-info btn-lg pull-right" href="{% url 'admin_check' order_id=order.id %}">Проверено админом</a>
             {% endif %}
             <hr>
         </div>

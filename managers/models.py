@@ -83,8 +83,8 @@ class Order(models.Model):
     created = models.DateTimeField(u'Создан', auto_now_add=True)
     last_updated = models.DateTimeField(u'Изменен', auto_now=True)
     # Продажа
-    order_num = models.IntegerField(u'Номер договора', null=True, unique=True)
-    saler = models.ForeignKey(settings.AUTH_USER_MODEL, verbose_name=u'Менеджер', null=True)
+    order_num = models.CharField(u'Номер договора', max_length=250, null=True, unique=True)
+    saler = models.ForeignKey(settings.AUTH_USER_MODEL, verbose_name=u'Менеджер', null=True, related_name='saler')
     sale_date = models.DateField(u'Дата продажи', null=True)
     customer_name = models.CharField(u'ФИО покупателя', max_length=150, blank=True, null=True)
     customer_addres = models.TextField(u'Адрес доставки', blank=True, null=True)
@@ -95,6 +95,7 @@ class Order(models.Model):
     full_money_date = models.DateField(u'Дата получения всей суммы', blank=True, null=True)
     # Администратор
     admin_check = models.BooleanField(u'Проверено админом', default=False)
+    admin_who_checked = models.ForeignKey(settings.AUTH_USER_MODEL, verbose_name=u'Проверивший админ', null=True, related_name='admin')
     is_active = models.BooleanField(u'Активно', default=True)
     # Бухгалтер
     accountant_check = models.BooleanField(u'Проверено бухгалтером', default=False)
@@ -176,8 +177,8 @@ class ActiveDeliveryManager(models.Manager):
 
 
 class Delivery(models.Model):
-    delivery_num = models.IntegerField(u'Номер доставки (реализации)', null=True, unique=True)
-    date = models.DateField(u'Дата доставки', null=True)
+    delivery_num = models.IntegerField(u'Номер доставки (реализации)', null=True, blank=True)
+    date = models.DateField(u'Дата доставки/самовывоза', null=True)
     selfdrive = models.BooleanField(u'Самовывоз', default=False)
     lifter = models.ManyToManyField(settings.AUTH_USER_MODEL, verbose_name=u'Грузчик', related_name='lifter_user',
                                     blank=True, null=True)
