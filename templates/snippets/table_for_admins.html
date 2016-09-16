@@ -19,7 +19,7 @@
             <td>{{ oi.order }}</td>
             <td>{{ oi.supplier_invoice_date }}</td>
             <td>{{ oi.supplier_delivered_date }}</td>
-            <td><a href="{% url 'orderitem_edit' id=oi.id %}">Изменить</a></td>
+            <td><a href="{% url 'orderitem_edit' pk=oi.id %}">Изменить</a></td>
         </tr>
     {% endfor %}
     </tbody>

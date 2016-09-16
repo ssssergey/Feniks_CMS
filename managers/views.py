@@ -6,7 +6,7 @@ from uuslug import slugify
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
-from django.http import HttpResponse, HttpResponseRedirect, Http404
+from django.http import HttpResponse, HttpResponseRedirect, Http404, JsonResponse
 from django.shortcuts import render, get_object_or_404
 from django.template.loader import render_to_string
 
@@ -44,7 +44,7 @@ class OrderCreate(LoginRequiredMixin, CreateView):
         order_id = obj.id
         order_num = obj.order_num
         messages.info(self.request, u'Договор №{} создан. Теперь добавьте укажите товары.'.format(order_num))
-        return HttpResponseRedirect(reverse('order_fill', kwargs={'order_id': order_id}))
+        return HttpResponseRedirect(self.get_success_url())
 
 
 # @login_required
@@ -62,20 +62,35 @@ class OrderCreate(LoginRequiredMixin, CreateView):
 #             return HttpResponseRedirect(reverse('order_fill', kwargs={'order_id': order_id}))
 #     return render(request, "order_create.html", locals())
 
+class OrderEdit(LoginRequiredMixin, UpdateView):
+    model = Order
+    form_class = OrderForm
+    template_name = "order_edit.html"
 
-@login_required
-def order_edit(request, order_id):
-    order = get_object_or_404(Order, id=order_id)
-    if order.saler != request.user and not request.user.role_admin and not request.user.is_superuser:
-        messages.warning(request, u'Вы не можете изменять этот договор, потому что не вы его заключали.')
-        return HttpResponseRedirect(reverse('home'))
-    form = OrderForm(instance=order)
-    if request.method == 'POST':
-        form = OrderForm(request.POST, instance=order)
-        if form.is_valid():
-            form.save()
-            return HttpResponseRedirect(reverse('order_fill', kwargs={'order_id': order_id}))
-    return render(request, "order_edit.html", locals())
+    def get_success_url(self):
+        return reverse('order_fill', args=(self.get_object().id,))
+
+    def form_valid(self, form):
+        order = self.get_object()
+        if order.saler != self.request.user and not self.request.user.role_admin and not self.request.user.is_superuser:
+            messages.warning(self.request, u'Вы не можете изменять этот договор, потому что не вы его заключали.')
+            return HttpResponseRedirect(reverse('home'))
+        return HttpResponseRedirect(self.get_success_url())
+
+
+# @login_required
+# def order_edit(request, order_id):
+#     order = get_object_or_404(Order, id=order_id)
+#     if order.saler != request.user and not request.user.role_admin and not request.user.is_superuser:
+#         messages.warning(request, u'Вы не можете изменять этот договор, потому что не вы его заключали.')
+#         return HttpResponseRedirect(reverse('home'))
+#     form = OrderForm(instance=order)
+#     if request.method == 'POST':
+#         form = OrderForm(request.POST, instance=order)
+#         if form.is_valid():
+#             form.save()
+#             return HttpResponseRedirect(reverse('order_fill', kwargs={'order_id': order_id}))
+#     return render(request, "order_edit.html", locals())
 
 
 @login_required
@@ -135,36 +150,88 @@ def orderitem_delete(request):
     return HttpResponse(response, content_type='application/javascript; charset=utf-8')
 
 
-@login_required
-def orderitem_edit(request, id):
-    orderitem = get_object_or_404(OrderItem, id=id)
-    form = OrderItemForm(instance=orderitem)
-    if request.method == 'POST':
-        form = OrderItemForm(request.POST, instance=orderitem)
-        if form.is_valid():
-            form.save()
-            messages.info(request, u'Изменения приняты.')
-            return HttpResponseRedirect(reverse('home'))
-    return render(request, "orderitem_edit.html", locals())
+class OrderItemEdit(LoginRequiredMixin, UpdateView):
+    model = OrderItem
+    form_class = OrderItemForm
+    template_name = "orderitem_edit.html"
+
+    def get_success_url(self):
+        return reverse('home')
+
+    def form_valid(self, form):
+        form.save()
+        messages.info(self.request, u'Изменения приняты.')
+        return HttpResponseRedirect(reverse('home'))
 
 
-@login_required
-def product_create(request):
-    form = ProductForm(request.POST)
-    if form.is_valid():
-        new_product = form.save(commit=False)
-        # cat_id = request.POST.get('categories')N
-        # new_product.categories = Category.active.get(id=cat_id)
-        new_product.slug = slugify(new_product.name)
-        new_product.save()
-        template = "snippets/product_table_row.html"
-        html = render_to_string(template, {'product': new_product})
-        response = json.dumps({'success': 'True', 'html': html})
-    else:
-        html = form.errors.as_ul()
-        print(html)
-        response = json.dumps({'success': 'False', 'html': html})
-    return HttpResponse(response, content_type='application/javascript; charset=utf-8')
+# @login_required
+# def orderitem_edit(request, id):
+#     orderitem = get_object_or_404(OrderItem, id=id)
+#     form = OrderItemForm(instance=orderitem)
+#     if request.method == 'POST':
+#         form = OrderItemForm(request.POST, instance=orderitem)
+#         if form.is_valid():
+#             form.save()
+#             messages.info(request, u'Изменения приняты.')
+#             return HttpResponseRedirect(reverse('home'))
+#     return render(request, "orderitem_edit.html", locals())
+
+class AjaxableResponseMixin(object):
+    def form_valid(self, form):
+        # response = super(AjaxableResponseMixin, self).form_valid(form)
+        if self.request.is_ajax():
+            new_product = form.save(commit=False)
+            # cat_id = request.POST.get('categories')
+            # new_product.categories = Category.active.get(id=cat_id)
+            new_product.slug = slugify(new_product.name)
+            new_product.save()
+            template = "snippets/product_table_row.html"
+            html = render_to_string(template, {'product': new_product})
+            data = {
+                'success': 'True', 'html': html
+            }
+            print ('ajax !!!')
+            return JsonResponse(data)
+        else:
+            print ('not ajax')
+            response = super(AjaxableResponseMixin, self).form_valid(form)
+            return response
+
+    def form_invalid(self, form):
+        response = super(AjaxableResponseMixin, self).form_invalid(form)
+        if self.request.is_ajax():
+            html = form.errors.as_ul()
+            data = {
+                'success': 'False', 'html': html
+            }
+            return JsonResponse(data)
+        else:
+            return response
+
+
+class ProductCreate(LoginRequiredMixin, AjaxableResponseMixin, CreateView):
+    model = Product
+    form_class = ProductForm
+
+
+
+# @login_required
+# def product_create(request):
+#     form = ProductForm(request.POST)
+#     if form.is_valid():
+#         new_product = form.save(commit=False)
+#         # cat_id = request.POST.get('categories')
+#         # new_product.categories = Category.active.get(id=cat_id)
+#         new_product.slug = slugify(new_product.name)
+#         new_product.save()
+#         template = "snippets/product_table_row.html"
+#         html = render_to_string(template, {'product': new_product})
+#         response = json.dumps({'success': 'True', 'html': html})
+#     else:
+#         html = form.errors.as_ul()
+#         print(html)
+#         response = json.dumps({'success': 'False', 'html': html})
+#     return HttpResponse(response, content_type='application/javascript; charset=utf-8')
 
 
 @login_required
@@ -262,17 +329,31 @@ class AdvanceMoneyDetail(LoginRequiredMixin, DetailView):
 #     return render(request, "advance_money_detail.html", locals())
 
 
-@login_required
-def advance_money_edit(request, id):
-    am = get_object_or_404(AdvanceMoney, id=id)
-    form = AdvanceMoneyForm(instance=am)
-    if request.method == 'POST':
-        form = AdvanceMoneyForm(request.POST, instance=am)
-        if form.is_valid():
-            form.save()
-            messages.info(request, u'Изменения приняты.')
-            return HttpResponseRedirect(reverse('advance_money_detail', kwargs={'id': id}))
-    return render(request, "advance_money_edit.html", locals())
+class AdvanceMoneyEdit(LoginRequiredMixin, UpdateView):
+    model = AdvanceMoney
+    form_class = AdvanceMoneyForm
+    template_name = "advance_money_edit.html"
+
+    def get_success_url(self):
+        return reverse('advance_money_detail', kwargs={'pk': self.get_object().id})
+
+    def form_valid(self, form):
+        form.save()
+        messages.info(self.request, u'Изменения приняты.')
+        return HttpResponseRedirect(self.get_success_url())
+
+
+# @login_required
+# def advance_money_edit(request, id):
+#     am = get_object_or_404(AdvanceMoney, id=id)
+#     form = AdvanceMoneyForm(instance=am)
+#     if request.method == 'POST':
+#         form = AdvanceMoneyForm(request.POST, instance=am)
+#         if form.is_valid():
+#             form.save()
+#             messages.info(request, u'Изменения приняты.')
+#             return HttpResponseRedirect(reverse('advance_money_detail', kwargs={'id': id}))
+#     return render(request, "advance_money_edit.html", locals())
 
 
 ######################## Delivery #############################
@@ -324,17 +405,30 @@ class DeliveryDetail(LoginRequiredMixin, DetailView):
 #     page_title = u'Доставка №{}'.format(delivery.delivery_num)
 #     return render(request, "delivery_detail.html", locals())
 
+class DeliveryEdit(LoginRequiredMixin, UpdateView):
+    model = Delivery
+    form_class = DeliveryForm
+    template_name = "delivery_edit.html"
 
-@login_required
-def delivery_edit(request, id):
-    delivery = get_object_or_404(Delivery, id=id)
-    form = DeliveryForm(instance=delivery)
-    if request.method == 'POST':
-        form = DeliveryForm(request.POST, instance=delivery)
-        if form.is_valid():
-            form.save()
-            return HttpResponseRedirect(reverse('delivery_fill', kwargs={'id': id}))
-    return render(request, "delivery_edit.html", locals())
+    def get_success_url(self):
+        return reverse('delivery_fill', kwargs={'id': self.get_object().id})
+
+    def form_valid(self, form):
+        form.save()
+        messages.info(self.request, u'Изменения приняты.')
+        return HttpResponseRedirect(self.get_success_url())
+
+
+# @login_required
+# def delivery_edit(request, id):
+#     delivery = get_object_or_404(Delivery, id=id)
+#     form = DeliveryForm(instance=delivery)
+#     if request.method == 'POST':
+#         form = DeliveryForm(request.POST, instance=delivery)
+#         if form.is_valid():
+#             form.save()
+#             return HttpResponseRedirect(reverse('delivery_fill', kwargs={'id': id}))
+#     return render(request, "delivery_edit.html", locals())
 
 
 @login_required

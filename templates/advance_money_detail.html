@@ -9,7 +9,7 @@
                 <p>Сумма: {{ object.advance_money }}</p>
             </div>
             <hr>
-            <a class="btn btn-warning btn-lg" href="{% url 'advance_money_edit' id=object.id %}">Изменить</a>
+            <a class="btn btn-warning btn-lg" href="{% url 'advance_money_edit' pk=object.id %}">Изменить</a>
             <hr>
         </div>
     </div>
