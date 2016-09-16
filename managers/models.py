@@ -177,10 +177,11 @@ class ActiveDeliveryManager(models.Manager):
 class Delivery(models.Model):
     delivery_num = models.IntegerField(u'Номер доставки (реализации)', null=True, unique=True)
     date = models.DateField(u'Дата доставки', null=True)
+    selfdrive = models.BooleanField(u'Самовывоз', default=False)
     lifter = models.ManyToManyField(settings.AUTH_USER_MODEL, verbose_name=u'Грузчик', related_name='lifter_user',
                                     blank=True, null=True)
     driver = models.ForeignKey(settings.AUTH_USER_MODEL, verbose_name=u'Водитель', related_name='driver_user',
-                               null=True)
+                               blank=True, null=True)
     addres = models.TextField(u'Адрес доставки', blank=True, null=True)
     zone = models.CharField(u'Зона', max_length=150, choices=((u'город', u'город'), (u'регион', u'регион')))
     stores = models.IntegerField(u'Этажи', blank=True, null=True)
