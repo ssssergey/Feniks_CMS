@@ -4,12 +4,12 @@
     <div class="row">
         <div class="col-sm-12">
             <div class="order_description">
-                <h2 align="center">Задаток для Договора №{{ am.order.order_num }}</h2>
-                <p>Дата: {{ am.date }}</p>
-                <p>Сумма: {{ am.advance_money }}</p>
+                <h2 align="center">Задаток для Договора №{{ object.order.order_num }}</h2>
+                <p>Дата: {{ object.date }}</p>
+                <p>Сумма: {{ object.advance_money }}</p>
             </div>
             <hr>
-            <a class="btn btn-warning btn-lg" href="{% url 'advance_money_edit' id=am.id %}">Изменить</a>
+            <a class="btn btn-warning btn-lg" href="{% url 'advance_money_edit' id=object.id %}">Изменить</a>
             <hr>
         </div>
     </div>

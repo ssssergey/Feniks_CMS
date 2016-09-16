@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import json
 from datetime import datetime
+from uuslug import slugify
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -8,8 +9,9 @@ from django.core.urlresolvers import reverse
 from django.http import HttpResponse, HttpResponseRedirect, Http404
 from django.shortcuts import render, get_object_or_404
 from django.template.loader import render_to_string
-from django.views.generic import ListView, CreateView
-from uuslug import slugify
+
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.views.generic import DetailView, ListView, CreateView, UpdateView, DeleteView, TemplateView
 
 from .forms import ProductForm, OrderForm, AdvanceMoneyForm, DeliveryForm, OrderItemForm
 from .models import Order, Product, Category, OrderItem, AdvanceMoney, Delivery
@@ -65,11 +67,22 @@ def order_list(request):
     return render(request, "order_list.html", locals())
 
 
-@login_required
-def order_detail(request, order_id):
-    order = get_object_or_404(Order, id=order_id)
-    page_title = u'Договор №{}'.format(order.order_num)
-    return render(request, "order_detail.html", locals())
+class OrderDetail(DetailView):
+    model = Order
+    template_name = "order_detail.html"
+
+    def get_context_data(self, **kwargs):
+        context = super(OrderDetail, self).get_context_data(**kwargs)
+        order = self.get_object()
+        context['page_title'] = u'Договор №{}'.format(order.order_num)
+        return context
+
+
+# @login_required
+# def order_detail(request, id):
+#     order = get_object_or_404(Order, id=id)
+#     page_title = u'Договор №{}'.format(order.order_num)
+#     return render(request, "order_detail.html", locals())
 
 
 @login_required
@@ -191,10 +204,20 @@ def advance_money_create(request):
     return render(request, "advance_money_create.html", locals())
 
 
-@login_required
-def advance_money_detail(request, id):
-    am = get_object_or_404(AdvanceMoney, id=id)
-    return render(request, "advance_money_detail.html", locals())
+class AdvanceMoneyDetail(DetailView):
+    model = AdvanceMoney
+    template_name = "advance_money_detail.html"
+
+    def get_context_data(self, **kwargs):
+        context = super(AdvanceMoneyDetail, self).get_context_data(**kwargs)
+        object = self.get_object()
+        context['page_title'] = u'Задаток №{}'.format(object.id)
+        return context
+
+# @login_required
+# def advance_money_detail(request, id):
+#     am = get_object_or_404(AdvanceMoney, id=id)
+#     return render(request, "advance_money_detail.html", locals())
 
 
 @login_required
@@ -225,12 +248,22 @@ def delivery_create(request):
             return HttpResponseRedirect(reverse('delivery_fill', kwargs={'id': delivery_id}))
     return render(request, "delivery_create.html", locals())
 
+class DeliveryDetail(DetailView):
+    model = Delivery
+    template_name = "delivery_detail.html"
 
-@login_required
-def delivery_detail(request, id):
-    delivery = get_object_or_404(Delivery, id=id)
-    page_title = u'Доставка №{}'.format(delivery.delivery_num)
-    return render(request, "delivery_detail.html", locals())
+    def get_context_data(self, **kwargs):
+        context = super(DeliveryDetail, self).get_context_data(**kwargs)
+        object = self.get_object()
+        context['page_title'] = u'Доставка №{}'.format(object.delivery_num)
+        return context
+
+
+# @login_required
+# def delivery_detail(request, id):
+#     delivery = get_object_or_404(Delivery, id=id)
+#     page_title = u'Доставка №{}'.format(delivery.delivery_num)
+#     return render(request, "delivery_detail.html", locals())
 
 
 @login_required
@@ -300,7 +333,7 @@ def find_delivery(request):
         messages.warning(request, u'Доставки №{} не существует.'.format(delivery_num))
         return render(request, "index.html", {})
     delivery_id = delivery.id
-    return HttpResponseRedirect(reverse('delivery_detail', kwargs={'id': delivery_id}))
+    return HttpResponseRedirect(reverse('delivery_detail', kwargs={'pk': delivery_id}))
 
 
 @login_required
@@ -312,7 +345,7 @@ def find_order(request):
         messages.warning(request, u'Договора №{} не существует.'.format(order_num))
         return render(request, "index.html", {})
     order_id = order.id
-    return HttpResponseRedirect(reverse('order_detail', kwargs={'order_id': order_id}))
+    return HttpResponseRedirect(reverse('order_detail', kwargs={'pk': order_id}))
 
 
 @login_required

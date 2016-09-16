@@ -36,7 +36,7 @@
                         {% endif %}
                     </form>
                 </td>
-                <td><a class="btn btn-primary" href="{% url 'order_detail' order_id=order.id %}">Подробнее...</a></td>
+                <td><a class="btn btn-primary" href="{% url 'order_detail' pk=order.id %}">Подробнее...</a></td>
             </tr>
         {% empty %}
             <tr>

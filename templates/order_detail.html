@@ -46,7 +46,7 @@
                                 <td>{{ forloop.counter }}</td>
                                 <td>{{ amoney.date }}</td>
                                 <td>{{ amoney.advance_money }} рублей</td>
-                                <td><a href="{% url 'advance_money_detail' id=amoney.id %}">Подробнее</a></td>
+                                <td><a href="{% url 'advance_money_detail' pk=amoney.id %}">Подробнее</a></td>
                             </tr>
                         {% endfor %}
                         </tbody>
