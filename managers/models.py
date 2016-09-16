@@ -91,6 +91,7 @@ class Order(models.Model):
     customer_phone = models.CharField(u'Номер телефона', max_length=250, blank=True, null=True)
     # Полная сумма
     kredit = models.BooleanField(u'Кредит', default=False)
+    delivery_money = models.IntegerField(u'Стоимость доставки', blank=True, null=True)
     full_money_date = models.DateField(u'Дата получения всей суммы', blank=True, null=True)
     # Администратор
     admin_check = models.BooleanField(u'Проверено админом', default=False)
