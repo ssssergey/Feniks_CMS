@@ -40,15 +40,24 @@
     {% endif %}
     {% if request.user.role_admin or request.user.is_superuser %}
         <div class="row">
-            <h2 align="center">Незавершенные договоры</h2>
+            <h2 align="center">Незавершенные договоры для админа</h2>
             <div class="col-sm-12">
                 {% include 'snippets/table_of_orders.html' %}
             </div>
         </div>
         <div class="row">
-            <h2 align="center">Позиции незавершенных договоров</h2>
+            <h2 align="center">Позиции незавершенных договоров для админа</h2>
             <div class="col-sm-12">
                 {% include 'snippets/table_for_admins.html' %}
+            </div>
+        </div>
+    {% endif %}
+    <hr>
+    {% if request.user.role_accountant or request.user.is_superuser %}
+        <div class="row">
+            <h2 align="center">Незавершенные договоры для бухгалтера</h2>
+            <div class="col-sm-12">
+                {% include 'snippets/table_of_orders.html' with orders=orders_accountant %}
             </div>
         </div>
     {% endif %}

@@ -6,6 +6,7 @@ $(document).ready(function () {
     $("#product_list").on('click', '.submit_add_to_order', addToOrder);
     $("#order_items_delivery").on('click', '.add_to_delivery_btn', addToDelivery);
     $("#order_items_list").on('click', '.delete_from_order_btn', deleteFromOrder);
+    $("#order_items_list").on('click', '.delete_from_delivery_btn', deleteFromDelivery);
     $("#get_orderitems_btn").click(extractOrderItems);
     // $(".submit_add_to_order").click(addToOrder);
 });
@@ -168,6 +169,30 @@ function deleteFromOrder(e) {
     };
 
     url = "/orderitem_delete";
+
+    $.ajax({
+        url: url,
+        type: "GET",
+        data: data,
+        dataType: "json",
+        success: function (response) {
+            console.log(response.html);
+            row.remove();
+        }
+    });
+}
+
+function deleteFromDelivery(e) {
+    e.preventDefault();
+    var row = $(this).parents('tr');
+    var oi_id = $(this).attr('id');
+    console.log(oi_id);
+
+    var data = {
+        oi_id: oi_id
+    };
+
+    url = "/orderitem_delete_from_delivery";
 
     $.ajax({
         url: url,

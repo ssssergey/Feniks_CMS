@@ -34,14 +34,15 @@
                     <tbody id="order_items_list">
                     {% if order_items %}
                         {% for oi in order_items %}
-                            {% include 'snippets/order_item_table_row.html' with orderitem=oi %}
+                            {% include 'snippets/order_item_table_row_delivery.html' with orderitem=oi %}
                         {% endfor %}
                     {% endif %}
                     </tbody>
                 </table>
+                <hr>
+                <a class="btn btn-warning btn-lg" href="{% url 'delivery_detail' pk=delivery.id %}">Готово</a>
             </div>
         </div>
-        <hr>
-        <a class="btn btn-warning btn-lg" href="{% url 'delivery_detail' pk=delivery.id %}">Готово</a>
+
     </div>
 {% endblock %}

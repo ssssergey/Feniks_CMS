@@ -11,6 +11,7 @@ class UserProfile(AbstractUser):
     role_admin = models.BooleanField(u'Администратор', default=False)
     role_driver = models.BooleanField(u'Водитель', default=False)
     role_lifter = models.BooleanField(u'Грузчик', default=False)
+    role_accountant = models.BooleanField(u'Бухгалтер', default=False)
 
     class Meta:
         verbose_name = u'Персонал'

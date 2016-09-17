@@ -14,7 +14,7 @@ class UserAdmin(UserAdmin):
     ordering = ['last_name']
     fieldsets = (
         (None, {'fields': ('password', 'username', 'last_name', 'first_name', 'patronymic')}),
-        (u'Должность', {'fields': ('role_saler', 'role_admin', 'role_driver', 'role_lifter', )}),
+        (u'Должность', {'fields': ('role_saler', 'role_admin', 'role_driver', 'role_lifter', 'role_accountant' )}),
         (u'Разрешения', {'fields': ('is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions')}),
         (u'Даты', {'fields': ('last_login', 'date_joined')}),
     )

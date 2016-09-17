@@ -22,13 +22,26 @@
                     </div>
                     <div id="collapseOne" class="panel-collapse collapse" role="tabpanel"
                          aria-labelledby="headingOne">
-                        <ul class="list-group">
+                        <table class="table">
+                            <thead>
+                            <tr>
+                                <th></th>
+                                <th>Договор</th>
+                                <th>Сумма</th>
+                                <th>Дата</th>
+                            </tr>
+                            </thead>
+                            <tbody>
                             {% for am in am_qs_all %}
-                                <li class="list-group-item">{{ forloop.counter }}. | {{ am.order }}
-                                    | {{ am.advance_money | intcomma }} руб. | {{ am.date }}
-                                </li>
+                                <tr>
+                                    <td>{{ forloop.counter }}.</td>
+                                    <td>{{ am.order }}</td>
+                                    <td>{{ am.advance_money | intcomma }} руб.</td>
+                                    <td>{{ am.date }}</td>
+                                </tr>
                             {% endfor %}
-                        </ul>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>

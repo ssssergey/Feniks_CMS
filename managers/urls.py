@@ -23,9 +23,11 @@ urlpatterns = [
     url(r'^get_orderitems$', get_orderitems, name='get_orderitems'),
     url(r'^orderitem_to_delivery$', orderitem_to_delivery, name='orderitem_to_delivery'),
     url(r'^orderitem_delete$', orderitem_delete, name='orderitem_delete'),
+    url(r'^orderitem_delete_from_delivery$', orderitem_delete_from_delivery, name='orderitem_delete_from_delivery'),
     url(r'^orderitem_edit/(?P<pk>[0-9]+)$', OrderItemEdit.as_view(), name='orderitem_edit'),
     url(r'^find_delivery$', find_delivery, name='find_delivery'),
     url(r'^find_order$', find_order, name='find_order'),
     url(r'^admin_check/(?P<order_id>[0-9]+)$', admin_check, name='admin_check'),
+    url(r'^accountant_check/(?P<order_id>[0-9]+)$', accountant_check, name='accountant_check'),
 ]
 

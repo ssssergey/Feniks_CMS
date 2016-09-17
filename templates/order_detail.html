@@ -92,7 +92,12 @@
             <hr>
             <a class="btn btn-warning btn-lg" href="{% url 'order_edit' pk=order.id %}">Изменить</a>
             {% if request.user.role_admin %}
-                <a class="btn btn-info btn-lg pull-right" href="{% url 'admin_check' order_id=order.id %}">Проверено админом</a>
+                <a class="btn btn-info btn-lg pull-right" href="{% url 'admin_check' order_id=order.id %}">Проверено
+                    админом</a>
+            {% endif %}
+            {% if request.user.role_accountant %}
+                <a class="btn btn-info btn-lg pull-right" href="{% url 'accountant_check' order_id=order.id %}">Проверено
+                    бухгалтером</a>
             {% endif %}
             <hr>
         </div>

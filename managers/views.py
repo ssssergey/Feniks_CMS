@@ -26,6 +26,8 @@ def index(request):
     if request.user.role_admin:
         orders = Order.objects.filter(admin_check=False)
         oi_list = OrderItem.objects.filter(order__admin_check=False)
+    if request.user.role_accountant:
+        orders_accountant = Order.objects.filter(admin_check=True, accountant_check=False)
     return render(request, "index.html", locals())
 
 
@@ -148,6 +150,7 @@ def orderitem_delete(request):
     except Exception as e:
         response = json.dumps({'success': 'False', 'html': str(e)})
     return HttpResponse(response, content_type='application/javascript; charset=utf-8')
+
 
 
 class OrderItemEdit(LoginRequiredMixin, UpdateView):
@@ -476,12 +479,23 @@ def orderitem_to_delivery(request):
             response = json.dumps({'success': 'False', 'html': html})
     return HttpResponse(response, content_type='application/javascript; charset=utf-8')
 
+@login_required
+def orderitem_delete_from_delivery(request):
+    oi_id = request.GET.get('oi_id')
+    try:
+        oi = OrderItem.objects.get(id=oi_id)
+        oi.delivery = None
+        oi.save()
+        response = json.dumps({'success': 'True', 'html': u'Удалено'})
+    except Exception as e:
+        response = json.dumps({'success': 'False', 'html': str(e)})
+    return HttpResponse(response, content_type='application/javascript; charset=utf-8')
 
 @login_required
 def find_delivery(request):
     delivery_num = request.GET.get('delivery_num')
     try:
-        delivery = Delivery.objects.get(delivery_num=delivery_num)
+        delivery = Delivery.objects.get(delivery_num=delivery_num, date__year=datetime.now().year)
     except:
         messages.warning(request, u'Доставки №{} не существует.'.format(delivery_num))
         return render(request, "index.html", {})
@@ -493,7 +507,7 @@ def find_delivery(request):
 def find_order(request):
     order_num = request.GET.get('order_num')
     try:
-        order = Order.objects.get(order_num=order_num)
+        order = Order.objects.get(order_num=order_num, sale_date__year=datetime.now().year)
     except:
         messages.warning(request, u'Договора №{} не существует.'.format(order_num))
         return render(request, "index.html", {})
@@ -515,6 +529,14 @@ def admin_check(request, order_id):
             return HttpResponseRedirect(reverse('home'))
     order.admin_check = True
     order.admin_who_checked = request.user
+    order.save()
+    messages.info(request, u'Подтверждение принято.')
+    return HttpResponseRedirect(reverse('home'))
+
+@login_required
+def accountant_check(request, order_id):
+    order = get_object_or_404(Order, id=order_id)
+    order.accountant_check = True
     order.save()
     messages.info(request, u'Подтверждение принято.')
     return HttpResponseRedirect(reverse('home'))

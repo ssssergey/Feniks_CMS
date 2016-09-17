@@ -3,6 +3,9 @@ from __future__ import unicode_literals
 
 from django.core.urlresolvers import reverse
 from django.db import models
+from django.db.models.signals import pre_save
+
+from uuslug import slugify
 
 from Feniks_CMS import settings
 
@@ -37,6 +40,7 @@ class Category(models.Model):
 ##############################################
 
 ################### Товары ####################
+
 class ActiveProductManager(models.Manager):
     def get_query_set(self):
         return super(ActiveProductManager, self).get_query_set().filter(is_active=True)
@@ -69,6 +73,12 @@ class Product(models.Model):
         return reverse('product', args=(self.slug,))
 
 
+def pre_save_product_receiver(sender, instance, *args, **kwargs):
+    if not instance.slug:
+        instance.slug = slugify(instance.name)
+
+pre_save.connect(pre_save_product_receiver, sender=Product)
+
 ####################################################
 
 
@@ -83,7 +93,7 @@ class Order(models.Model):
     created = models.DateTimeField(u'Создан', auto_now_add=True)
     last_updated = models.DateTimeField(u'Изменен', auto_now=True)
     # Продажа
-    order_num = models.CharField(u'Номер договора', max_length=250, null=True, unique=True)
+    order_num = models.CharField(u'Номер договора', max_length=250, null=True)
     saler = models.ForeignKey(settings.AUTH_USER_MODEL, verbose_name=u'Менеджер', null=True, related_name='saler')
     sale_date = models.DateField(u'Дата продажи', null=True)
     customer_name = models.CharField(u'ФИО покупателя', max_length=150, blank=True, null=True)
