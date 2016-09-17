@@ -2,7 +2,7 @@ $(document).ready(function () {
     $("#product_form").css('display', 'none');
     $("#add_product").css('display', 'block');
     $("#add_product").click(slideToggleForm);
-    $("#submit_product").click(addProduct);
+    // $("#submit_product").click(addProduct);  // Replaced by AngularJS
     $("#product_list").on('click', '.submit_add_to_order', addToOrder);
     $("#order_items_delivery").on('click', '.add_to_delivery_btn', addToDelivery);
     $("#order_items_list").on('click', '.delete_from_order_btn', deleteFromOrder);
@@ -68,44 +68,46 @@ function slideToggleForm() {
     $("#add_product").slideToggle();
 }
 
-function addProduct(e) {
-    e.preventDefault();
-    var csrf_tag = $(this).siblings('input[name=csrfmiddlewaretoken]').val();
-    var data = {
-        name: $("#id_name").val(),
-        categories: $("#id_categories").val(),
-        description: $("#id_description").val(),
-        csrfmiddlewaretoken: csrf_tag
-    };
-    console.log(data);
+// Replaced by AngularJS
 
-    url = "/product_create";
-
-    $.ajax({
-        url: url,
-        type: "POST",
-        data: data,
-        dataType: "json",
-        success: function (response) {
-            $(".product_errors").empty();
-            if (response.success == "True") {
-                // console.log(response.html);
-                // $("#submit_product").attr('disabled', 'disabled');
-                $("#product_list").append(response.html).slideDown();
-                $("#product_list").children(":last").addClass('newly_added_product');
-                $("#product_form").slideToggle();
-                $("#add_product").slideToggle();
-                $("#id_name").val('');
-                $("#id_categories").val('');
-                $("#id_description").val('');
-            }
-            else {
-                $(".product_errors").append(response.html);
-                console.log(response.html)
-            }
-        }
-    });
-}
+// function addProduct(e) {
+//     e.preventDefault();
+//     var csrf_tag = $(this).siblings('input[name=csrfmiddlewaretoken]').val();
+//     var data = {
+//         name: $("#id_name").val(),
+//         categories: $("#id_categories").val(),
+//         description: $("#id_description").val(),
+//         csrfmiddlewaretoken: csrf_tag
+//     };
+//     console.log(data);
+//
+//     url = "/product_create";
+//
+//     $.ajax({
+//         url: url,
+//         type: "POST",
+//         data: data,
+//         dataType: "json",
+//         success: function (response) {
+//             $(".product_errors").empty();
+//             if (response.success == "True") {
+//                 // console.log(response.html);
+//                 // $("#submit_product").attr('disabled', 'disabled');
+//                 $("#product_list").append(response.html).slideDown();
+//                 $("#product_list").children(":last").addClass('newly_added_product');
+//                 $("#product_form").slideToggle();
+//                 $("#add_product").slideToggle();
+//                 $("#id_name").val('');
+//                 $("#id_categories").val('');
+//                 $("#id_description").val('');
+//             }
+//             else {
+//                 $(".product_errors").append(response.html);
+//                 console.log(response.html)
+//             }
+//         }
+//     });
+// }
 
 function addToOrder(e) {
     e.preventDefault();

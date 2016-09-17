@@ -52,10 +52,12 @@
 
             <a class="btn btn-warning" id="add_product">Создать товар в номенклатуре</a>
             <div id="product_form">
-                <form class="form-group">
+                <form class="form-group" ng-submit="create_product()">
                     {% csrf_token %}
                     <div id="product_errors"></div>
-                    {{ product_form | crispy }}
+                    <label for="name">Название товара</label>
+                    <p ng-show="errors" class="errorlist">[[errors]]</p>
+                    <input type="text" name="name" class="form-control" ng-model="product.name">
                     <input class="btn btn-primary" type="submit" id="submit_product" value="Добавить товар"/>
                 </form>
             </div>

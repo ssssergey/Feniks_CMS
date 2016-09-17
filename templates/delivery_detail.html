@@ -7,9 +7,7 @@
                 <h2 align="center">Доставка №{{ delivery.delivery_num }}</h2>
                 <p>Дата доставки: {{ delivery.date }}</p>
                 <p>Адрес доставки: {{ delivery.addres }}</p>
-                <p>Зона: {{ delivery.zone }}</p>
                 <p>Количество этажей: {{ delivery.stores }}</p>
-                <p>Стоимость сборки: {{ delivery.assembly }}</p>
                 <p>Водитель: {{ delivery.driver }}</p>
                 {% if delivery.lifter.all %}
                     <h3>Грузчики:</h3>
