@@ -10,6 +10,18 @@
                 <input ng-model="query" type="text" class="form-control" id="search"/>
             </div>
             <hr>
+            <a class="btn btn-warning" id="add_product">Создать товар в номенклатуре</a>
+            <div id="product_form">
+                <form class="form-group" ng-submit="create_product()">
+                    {% csrf_token %}
+                    <div id="product_errors"></div>
+                    <label for="name">Название товара</label>
+                    <p ng-show="errors" class="errorlist">[[errors]]</p>
+                    <input type="text" name="name" class="form-control" ng-model="product.name">
+                    <input class="btn btn-primary" type="submit" id="submit_product" value="Добавить товар"/>
+                    <div><small>*Если вы не видите добавленный товар, то очистите поле поиска!</small></div>
+                </form>
+            </div>
             <table class="table table-responsive">
                 <thead>
                 <tr>
@@ -50,17 +62,7 @@
             </table>
             <div class="product_errors"></div>
 
-            <a class="btn btn-warning" id="add_product">Создать товар в номенклатуре</a>
-            <div id="product_form">
-                <form class="form-group" ng-submit="create_product()">
-                    {% csrf_token %}
-                    <div id="product_errors"></div>
-                    <label for="name">Название товара</label>
-                    <p ng-show="errors" class="errorlist">[[errors]]</p>
-                    <input type="text" name="name" class="form-control" ng-model="product.name">
-                    <input class="btn btn-primary" type="submit" id="submit_product" value="Добавить товар"/>
-                </form>
-            </div>
+
         </div>
         <div class="col-sm-6">
             <div id="order_items">

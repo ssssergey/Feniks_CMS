@@ -21,7 +21,7 @@ app.controller('ProductsCtrl', function ($scope, $http) {
             data: $scope.product
         })
             .success(function (data) {
-                $scope.items.push(data);
+                $scope.items.unshift(data);
             })
             .error(function (error, status) {
                 $scope.errors = error.name[0];
