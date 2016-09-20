@@ -20,7 +20,13 @@
         <tr>
             <td>Договор №{{ order.order_num }}</td>
             <td>{{ order.sale_date }}</td>
-            <td>{{ order.quantity }}</td>
+            <td>
+                {% if order.quantity == 0 %}
+                    <span style="background-color: red; color: white; padding: 5px">{{ order.quantity }}</span>
+                {% else %}
+                    <span>{{ order.quantity }}</span>
+                {% endif %}
+            </td>
             <td>{{ order.total }}</td>
             <td>
                 {% if order.kredit %}

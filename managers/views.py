@@ -11,9 +11,9 @@ from django.shortcuts import render, get_object_or_404
 from django.template.loader import render_to_string
 
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.views.generic import DetailView, ListView, CreateView, UpdateView, DeleteView, TemplateView
+from django.views.generic import DetailView, ListView, CreateView, UpdateView, DeleteView, TemplateView, View
 
-from .forms import ProductForm, OrderForm, AdvanceMoneyForm, DeliveryForm, OrderItemForm
+from .forms import ProductForm, OrderForm, AdvanceMoneyForm, DeliveryForm, OrderItemForm, OrderCreateForm
 from .models import Order, Product, Category, OrderItem, AdvanceMoney, Delivery
 
 
@@ -23,29 +23,38 @@ def index(request):
     limit_date = datetime(2016, 11, 1)
     if now > limit_date:
         raise Http404
-    if request.user.role_admin:
+    if request.user.role_admin or request.user.is_superuser:
         orders = Order.objects.filter(admin_check=False)
-        oi_list = OrderItem.objects.filter(order__admin_check=False)
-    if request.user.role_accountant:
+        oi_list = OrderItem.objects.filter(delivery=False)
+    if request.user.role_accountant or request.user.is_superuser:
         orders_accountant = Order.objects.filter(admin_check=True, accountant_check=False)
     return render(request, "index.html", locals())
 
 
-class OrderCreate(LoginRequiredMixin, CreateView):
+class OrderCreate(LoginRequiredMixin, View):
     model = Order
-    form_class = OrderForm
+    form_class = OrderCreateForm
     template_name = "order_create.html"
 
-    def get_success_url(self):
-        return reverse('order_fill', args=(self.get_object().id,))
+    def get(self, request, *args, **kwargs):
+        form = self.form_class()
+        return render(request, self.template_name, {'form': form})
 
-    def form_valid(self, form):
-        obj = form.save()
-        obj.saler = self.request.user
-        obj.save()
-        order_num = obj.order_num
-        messages.info(self.request, u'Договор №{} создан. Теперь добавьте укажите товары.'.format(order_num))
-        return HttpResponseRedirect(self.get_success_url())
+    def post(self, request, *args, **kwargs):
+        form = self.form_class(request.POST)
+        if form.is_valid():
+            obj = form.save()
+            return HttpResponseRedirect(reverse('order_fill', kwargs={'pk': obj.pk}))
+
+        return render(request, self.template_name, {'form': form})
+
+    # def form_valid(self, form):
+    #     obj = form.save()
+    #     obj.saler = self.request.user
+    #     obj.save()
+    #     order_num = obj.order_num
+    #     messages.info(self.request, u'Договор №{} создан. Теперь добавьте укажите товары.'.format(order_num))
+    #     return HttpResponseRedirect(reverse('order_fill', kwargs={'pk': self.get_object().pk}))
 
 
 # @login_required
@@ -69,7 +78,7 @@ class OrderEdit(LoginRequiredMixin, UpdateView):
     template_name = "order_edit.html"
 
     def get_success_url(self):
-        return reverse('order_fill', args=(self.get_object().id,))
+        return reverse('order_fill', kwargs={'pk': self.get_object().pk})
 
     def form_valid(self, form):
         order = self.get_object()
@@ -132,9 +141,9 @@ def order_delete(request, order_id):
 
 
 @login_required
-def order_fill(request, order_id):
-    order = get_object_or_404(Order, id=order_id)
-    order_items = OrderItem.objects.filter(order__id=order_id)
+def order_fill(request, pk):
+    order = get_object_or_404(Order, pk=pk)
+    order_items = OrderItem.objects.filter(order__pk=pk)
     product_list = Product.objects.all()
     product_form = ProductForm()
     return render(request, "order_fill.html", locals())

@@ -80,7 +80,7 @@ class WorkerMonthArchiveView(LoginRequiredMixin, MonthArchiveView):
         context['lifts'] = lifts
 
         # Driver
-        drives = Delivery.objects.filter(lifter__id=self.kwargs['user_id'], date__month=self.get_month())
+        drives = Delivery.objects.filter(driver__id=self.kwargs['user_id'], date__month=self.get_month())
         context['drives'] = drives
 
         # Admin

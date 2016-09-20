@@ -195,7 +195,7 @@ class Delivery(models.Model):
     driver = models.ForeignKey(settings.AUTH_USER_MODEL, verbose_name=u'Водитель', related_name='driver_user',
                                blank=True, null=True)
     addres = models.TextField(u'Адрес доставки', blank=True, null=True)
-    stores = models.IntegerField(u'Этажи', blank=True, null=True)
+    price = models.IntegerField(u'Стоимость заноса', blank=True, null=True)
     is_active = models.BooleanField(u'Активно', default=True)
     objects = models.Manager()
     active = ActiveDeliveryManager()

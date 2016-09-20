@@ -17,7 +17,6 @@ class ProductForm(forms.ModelForm):
             'description': forms.Textarea(attrs={'rows': 3}),
         }
 
-
 class OrderForm(forms.ModelForm):
     class Meta:
         model = Order
@@ -28,6 +27,27 @@ class OrderForm(forms.ModelForm):
             'full_money_date': forms.DateInput(attrs={'class': 'datepicker'}),
             'customer_addres': forms.Textarea(attrs={'rows': 3}),
         }
+
+class OrderCreateForm(forms.ModelForm):
+    class Meta:
+        model = Order
+        fields = ['order_num', 'sale_date', 'customer_name', 'customer_addres', 'customer_phone', 'kredit',
+                  'delivery_money', 'full_money_date']
+        widgets = {
+            'sale_date': forms.DateInput(attrs={'class': 'datepicker'}),
+            'full_money_date': forms.DateInput(attrs={'class': 'datepicker'}),
+            'customer_addres': forms.Textarea(attrs={'rows': 3}),
+        }
+
+    def clean(self):
+        cleaned_data = super(OrderForm, self).clean()
+        sale_date = cleaned_data.get('sale_date')
+        year = sale_date.year
+        order_num = cleaned_data.get('order_num')
+        num_results = Order.objects.filter(order_num=order_num, sale_date__year=year).count()
+        if num_results > 0:
+            raise forms.ValidationError(u"Договор с таким номером уже существует.")
+        return cleaned_data
 
 
 class OrderItemForm(forms.ModelForm):
@@ -68,7 +88,7 @@ class AdvanceMoneyForm(forms.ModelForm):
 class DeliveryForm(forms.ModelForm):
     class Meta:
         model = Delivery
-        fields = ['delivery_num', 'date', 'selfdrive', 'driver', 'lifter', 'addres', 'stores']
+        fields = ['delivery_num', 'date', 'selfdrive', 'driver', 'lifter', 'addres', 'price']
         widgets = {
             'date': forms.DateInput(attrs={'class': 'datepicker'}),
             'lifter': forms.CheckboxSelectMultiple(),

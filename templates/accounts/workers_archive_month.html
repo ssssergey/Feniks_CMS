@@ -61,7 +61,7 @@
                 <h1 class="role_in_account">Грузчик</h1>
                 <h2>1. Общее количество погрузок: {{ lifts|length }}.</h2>
                 {% for delivery in lifts %}
-                    <p>{{ forloop.counter }}. {{ delivery }} - {{ delivery.date }} - Этажи:{{ delivery.stores }}</p>
+                    <p>{{ forloop.counter }}. {{ delivery }} - {{ delivery.date }} - Общая сумма заноса: {{ delivery.price }}</p>
                 {% endfor %}
             {% endif %}
             {% if drives %}
