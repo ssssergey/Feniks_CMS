@@ -1,111 +1,127 @@
 # -*- coding: utf-8 -*-
 import time
 
+from django.contrib import messages
+from django.contrib.auth import login, authenticate, logout, get_user_model
+from django.contrib.auth.decorators import login_required, user_passes_test
+from django.shortcuts import render_to_response, get_object_or_404, redirect, \
+    render
 from django.template import RequestContext
-from django.shortcuts import render_to_response, get_object_or_404, redirect, render
-from django.core import urlresolvers
-from django.http import HttpResponseRedirect
-from django.contrib.auth import login, authenticate, logout
-from django.contrib.auth.decorators import login_required
+from django.http import Http404
+from django.views.generic.dates import MonthArchiveView, DayArchiveView
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.db.models import Q
+from django.utils.decorators import method_decorator
 
 from forms import UserLoginForm
+from managers.models import Order, OrderItem, AdvanceMoney, Delivery
 
-# from cart.models import Order, OrderItem
-# from cart.cart import remove_from_orders
-
-# CUSTOM LOGIN
-def login_view(request):
-    print(request.user.is_authenticated())
-    page_title = u"Вход"
-    form = UserLoginForm(request.POST or None)
-    if form.is_valid():
-        username = form.cleaned_data.get('username')
-        password = form.cleaned_data.get('password')
-        user = authenticate(username=username, password=password)
-        login(request, user)
-        return redirect('/')
-    return render(request, "accounts/login.html", {"form": form, "page_title": page_title})
+User = get_user_model()
 
 
-# CUSTOM LOGOUT
-def logout_view(request):
-    logout(request)
-    return render(request, "index.html", {})
+class WorkerDayArchiveView(LoginRequiredMixin, DayArchiveView):
+    """ Daily report for boss  """
+    queryset = Order.objects.all()
+    date_field = "sale_date"
+    template_name = 'accounts/workers_archive_day.html'
+    allow_empty = True
+    ordering = 'sale_date'
+
+    def get_queryset(self):
+        qs = super(WorkerDayArchiveView, self).get_queryset()
+        qs = qs.filter(Q(saler__id=self.kwargs['user_id']) | Q(saler2__id=self.kwargs['user_id'])).distinct()
+        return qs
+
+    def get_context_data(self, **kwargs):
+        context = super(WorkerDayArchiveView, self).get_context_data(**kwargs)
+
+        qs = context['object_list']
+
+        total_per_saler = 0
+        for order in qs:
+            total_per_saler += order.total_per_saler
+        context['total'] = total_per_saler
+        return context
 
 
+class WorkerMonthArchiveView(LoginRequiredMixin, MonthArchiveView):
+    queryset = Order.objects.all()
+    date_field = "sale_date"
+    template_name = 'accounts/workers_archive_month.html'
+    allow_empty = True
+    month_format = '%m'
+    ordering = 'sale_date'
 
+    def get_queryset(self):
+        qs = super(WorkerMonthArchiveView, self).get_queryset()
+        qs = qs.filter(Q(saler__id=self.kwargs['user_id']) | Q(saler2__id=self.kwargs['user_id'])).distinct()
+        return qs
 
+    def get_context_data(self, **kwargs):
+        context = super(WorkerMonthArchiveView, self).get_context_data(**kwargs)
+        user = get_object_or_404(User, id=self.kwargs['user_id'])
+        context['current_user'] = user
 
-@login_required
-def my_account(request, template_name="accounts/my_account.html"):
-    if request.method == 'POST':
-        postdata = request.POST.copy()
-        print postdata
-        if postdata['submit'] == u'Удалить':
-            remove_from_orders(request)
-    name = request.user.get_full_name()
-    page_title = u'Личный кабинет'
-    orders = Order.objects.filter(user=request.user)
-    torgpred = False
-    user = request.user
-    if user.groups.filter(name=u'Торговые представители').exists():
-        torgpred = True
-        data = {}
-        user_oi_qs = OrderItem.objects.filter(order__user=user)
-        user_oi_qs_processed = user_oi_qs.filter(order__status=1)
-        user_oi_qs_submitted = user_oi_qs.filter(order__status=2)
-        user_oi_qs_shipped = user_oi_qs.filter(order__status=3)
-        user_oi_qs_completed = user_oi_qs.filter(order__status=4)
-        user_oi_qs_canceled = user_oi_qs.filter(order__status=0)
-        x = 6
-        now = time.localtime()
-        last_months = [time.localtime(time.mktime((now.tm_year, now.tm_mon - n, 1, 0, 0, 0, 0, 0, 0)))[:2] for n in range(x)]
-        # [(2016, 8), (2016, 7), (2016, 6), (2016, 5), (2016, 4), (2016, 3), (2016, 2), (2016, 1), (2015, 12), (2015, 11)]
-        data = []
-        for couple in last_months:
-            month_obj = {
-                'month':couple,
-                'products_aggregated': [],
-                'product_items': [],
-                'month_total': 0,
-                'month_margin': 0,
-            }
-            month_oi_qs = user_oi_qs_completed.filter(order__date__year=couple[0], order__date__month=couple[1])
-            distinct_product_oi_qs = month_oi_qs.distinct('product')
+        qs = context['object_list']
 
-            # for i in distinct_product_oi_qs:
-            #     product_sum = month_oi_qs.filter(Q(product=i.product)).aggregate(Sum("quantity"))
-            #     month_obj['products_aggregated'].append((i.product, product_sum))
+        total_per_saler = 0
+        for order in qs:
+            total_per_saler += order.total_per_saler
+        context['total'] = total_per_saler
 
-            for p in month_oi_qs:
-                month_obj['month_total'] += p.total
-                p.margin = (p.price-p.product.price_bulk1)*p.quantity
-                month_obj['month_margin'] += p.margin
-                month_obj['product_items'].append(p)
-            month_obj['percent'] = 0
-            if month_obj['month_total'] < 100000:
-                month_obj['percent'] = 20
-            elif month_obj['month_total'] > 100000 and month_obj['month_total'] < 500000:
-                month_obj['percent'] = 40
-            elif month_obj['month_total'] > 500000 and month_obj['month_total'] < 1000000:
-                month_obj['percent'] = 60
-            elif month_obj['month_total'] > 1000000 and month_obj['month_total'] < 2000000:
-                month_obj['percent'] = 80
-            elif month_obj['month_total'] > 2000000:
-                month_obj['percent'] = 100
-            month_obj['profit'] = month_obj['month_margin']/100  * month_obj['percent']
-            data.append(month_obj)
-    # storage = get_messages(request)
-    # for message in storage:
-    #     print message
-    return render_to_response(template_name, locals(), context_instance=RequestContext(request))
+        realiz_qs = qs.filter(full_money_date__isnull=False)
 
+        realiz_total = 0
+        for order in realiz_qs:
+            realiz_total += order.total_per_saler
+        context['realiz_total'] = realiz_total
+        context['realiz_qs'] = realiz_qs
 
-@login_required
-def order_details(request, order_id, template_name="accounts/order_details.html"):
-    order = get_object_or_404(Order, id=order_id, user=request.user)
-    page_title = u'Подробнее о Заказе #' + order_id
-    order_items = OrderItem.objects.filter(order=order)
-    return render_to_response(template_name, locals(), context_instance=RequestContext(request))
+        # am_qs = AdvanceMoney.objects.filter(order__in=qs,
+        #                                     order__saler__id=self.kwargs[
+        #                                         'user_id'],
+        #                                     order__full_money_date__isnull=True)
+        # am_total = 0
+        # for am in am_qs:
+        #     am_total += am.advance_money
+        # context['am_total'] = am_total
+        # context['am_qs'] = am_qs
 
+        all_qs = self.get_queryset()
+        realiz_cashin_qs = all_qs.filter(full_money_date__month=self.get_month())
 
+        realiz_cashin_total = 0
+        for order in realiz_cashin_qs:
+            realiz_cashin_total += order.total
+        context['realiz_cashin_total'] = realiz_cashin_total
+        context['realiz_cashin_qs'] = realiz_cashin_qs
+
+        # am_cashin_qs = AdvanceMoney.objects.filter(
+        #     date__month=self.get_month(),
+        #     order__saler__id=self.kwargs['user_id'],
+        #     order__full_money_date__isnull=True)
+        # am_cashin_total = 0
+        # for am in am_cashin_qs:
+        #     am_cashin_total += am.advance_money
+        # context['am_cashin_total'] = am_cashin_total
+        # context['am_cashin_qs'] = am_cashin_qs
+
+        # Lifter
+        lifts = Delivery.objects.filter(lifter__id=self.kwargs['user_id'],
+                                        date__month=self.get_month()).prefetch_related('orderitem_set__order')
+        total_per_lifter = 0
+        for lift in lifts:
+            total_per_lifter += lift.price_per_lifter
+        context['lifts'] = lifts
+        context['total_per_lifter'] = total_per_lifter
+
+        # Driver
+        drives = Delivery.objects.filter(driver__id=self.kwargs['user_id'], date__month=self.get_month())
+        context['drives'] = drives
+
+        # Admin
+        admins = OrderItem.objects.filter(supplier_invoice_date__month=self.get_month(),
+                                          admin_id=self.kwargs['user_id']).select_related('order', 'product')
+        context['admins'] = admins
+
+        return context

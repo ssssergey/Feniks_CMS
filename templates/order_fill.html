@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-sm-6" ng-controller="ProductsCtrl" ng-init="initialize('Ready')">
+            <h2 align="center">Номенклатура товаров для добавления в договор</h2>
+            <div class="form-inline searching" align="center">
+                <label for="search">Поиск: </label>
+                <input ng-model="query" type="text" class="form-control" id="search"/>
+            </div>
+            <hr>
+            <a class="btn btn-warning" id="add_product">Создать товар в номенклатуре</a>
+            <div id="product_form">
+                <form class="form-group" ng-submit="create_product()">
+                    {% csrf_token %}
+                    <div id="product_errors"></div>
+                    <label for="name">Название товара</label>
+                    <p ng-show="errors" class="errorlist">[[errors]]</p>
+                    <input type="text" name="name" class="form-control" ng-model="product.name">
+                    <input class="btn btn-primary" type="submit" id="submit_product" value="Добавить товар"/>
+                    <div><small>*Если вы не видите добавленный товар, то очистите поле поиска!</small></div>
+                </form>
+            </div>
+            <table class="table table-responsive">
+                <thead>
+                <tr>
+                    <th>Товар</th>
+                    <th>Цена и количество</th>
+                </tr>
+                </thead>
+                <tbody id="product_list">
+                <tr ng-repeat="item in items | filter: query">
+                    <td class="product_name" style="max-width: 10vw">[[ item.name ]]</td>
+                    <td>
+                        <form class="form-horizontal">
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <label for="price">Цена</label>
+                                    <input type="number" name="price"
+                                           size="4" class="price" maxlength="4" required/><br>
+                                    <label for="price">Скидка с товара</label>
+                                    <input type="number" name="discount"
+                                           size="6" class="discount" maxlength="8"/><br>
+                                    <label for="quantity">Кол-во</label>
+                                    <input type="number" name="quantity" value="1"
+                                           size="2" class="quantity " maxlength="5" required/><br>
+                                    <label for="quantity">В наличии</label>
+                                    <input type="checkbox" name="present" value="true"
+                                           class="present"/><br>
+                                    <input type="hidden" name="product_id" class="product_id" value="[[ item.id ]]"/>
+                                </div>
+                                <div class="col-sm-6">
+                                    <a class="submit_add_to_order" type="submit" href="#">Добавить в заказ <i
+                                            class="fa fa-arrow-right fa-lg" aria-hidden="true"></i></a>
+                                </div>
+                            </div>
+                        </form>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+            <div class="product_errors"></div>
+        </div>
+
+
+        <div class="col-sm-6">
+            <div id="order_items">
+                <h2>Текущий договор №<span id="order_num">{{ order.order_num }}</span></h2>
+                <span id="order_id" hidden>{{ order.id }}</span>
+
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th>Товар</th>
+                        <th>Кол-во</th>
+                        <th>Сумма со скидкой</th>
+                        <th>Скидка</th>
+                        <th>Договор</th>
+                        <th>Доставка</th>
+                    </tr>
+                    </thead>
+                    <tbody id="order_items_list">
+                    {% if order_items %}
+                        {% for oi in order_items %}
+                            {% include 'snippets/order_item_table_row.html' with orderitem=oi %}
+                        {% endfor %}
+                    {% endif %}
+                    </tbody>
+                </table>
+            </div>
+            <hr>
+            <div align="center">
+                <a class="btn btn-warning btn-lg" href="{% url 'order_detail' pk=order.id %}">Готово</a>
+            </div>
+        </div>
+
+    </div>
+{% endblock %}

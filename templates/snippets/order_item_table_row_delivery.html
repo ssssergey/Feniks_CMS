@@ -1,0 +1,9 @@
+<tr>
+    <td>{{ orderitem.product.name }}</td>
+    <td>{{ orderitem.quantity }}</td>
+    <td>{{ orderitem.total_with_discount }}</td>
+    <td>{{ orderitem.discount }}</td>
+    <td>{{ orderitem.order }}</td>
+    <td>{{ orderitem.delivery }}</td>
+    <td><a class="delete_from_delivery_btn" id="{{ orderitem.id }}" href="#">Удалить</a></td>
+</tr>

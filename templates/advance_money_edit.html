@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-sm-12" align="center">
+            <form method="post" action="">
+                {% csrf_token %}
+                <div>{{ form.errors }}</div>
+                {% for field in form %}
+                    {% if field.auto_id == 'id_order_num' %}
+                        {{ field.as_hidden }}
+                    {% else %}
+                        {{ field | as_crispy_field }}
+                    {% endif %}
+                {% endfor %}
+                <hr>
+                <button type="submit" class="btn btn-warning">Сохранить</button>
+                <hr>
+            </form>
+        </div>
+    </div>
+{% endblock %}

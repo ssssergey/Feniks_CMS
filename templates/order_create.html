@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-sm-12">
+            <h2 align="center"><i class="fa fa-lg fa-file-text-o" aria-hidden="true"></i>&nbsp;Добавить
+                договор</h2>
+            <div align="center">
+                <form method="post" action="">
+                    {% csrf_token %}
+                    {{ form|crispy }}
+                    <hr>
+                    <button type="submit" class="btn btn-warning btn-lg">Добавить товары</button>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}

@@ -1,10 +1,60 @@
 {% extends "base.html" %}
 
 {% block content %}
-    {% if request.user.fullname %}
-        {{ request.user.fullname }}
-    {% endif %}
 
-    <a href="{% url 'product_list' %}" class="btn btn-lg btn-primary">Новый заказ</a>
+    {% if request.user.role_saler or request.user.role_accountant or request.user.is_superuser %}
+        <div class="row">
+            <div class="col-sm-4 col-sm-offset-4" align="center">
+                <a href="{% url 'order_create' %}" class="btn btn-lg btn-primary btn_margin">&nbsp;Новый договор</a>
+                <form method="get" action="{% url 'find_order' %}">
+                    <div class="input-group">
+                        <input name="order_num" type="text" class="form-control" placeholder="Номер договора">
+                  <span class="input-group-btn">
+                    <button class="btn btn-warning" type="submit">Найти</button>
+                  </span>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <hr>
+    {% endif %}
+    {% if request.user.role_saler or request.user.role_accountant or request.user.role_admin or request.user.is_superuser %}
+        <div class="row">
+            <div class="col-sm-4" align="center">
+                <a href="{% url 'advance_money_create' %}" class="btn btn-lg btn-primary btn_margin"><i
+                        class="fa fa-lg fa-money" aria-hidden="true"></i>&nbsp;Добавить предоплату по
+                    договору</a>
+            </div>
+            <div class="col-sm-4 col-sm-offset-4" align="center">
+                <a href="{% url 'delivery_create' %}" class="btn btn-lg btn-primary btn_margin"><i
+                        class="fa fa-lg fa-truck" aria-hidden="true"></i>&nbsp;Добавить доставку</a>
+                <form method="get" action="{% url 'find_delivery' %}">
+                    <div class="input-group">
+                        <input name="delivery_num" type="text" class="form-control"
+                               placeholder="Номер доставки">
+                  <span class="input-group-btn">
+                    <button class="btn btn-warning" type="submit">Найти</button>
+                  </span>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <hr>
+    {% endif %}
+    {% if request.user.role_admin or request.user.role_accountant or request.user.is_superuser %}
+        <div class="row">
+            <h2 align="center">Непроверенные договоры (для админа)</h2>
+            <div class="col-sm-12">
+                {% include 'snippets/table_of_orders_admin.html' %}
+            </div>
+        </div>
+        <div class="row">
+            <h2 align="center">Недоставленные позиции (для админа)</h2>
+            <div class="col-sm-12">
+                {% include 'snippets/table_for_admins.html' %}
+            </div>
+        </div>
+    {% endif %}
+    <hr>
 
 {% endblock %}

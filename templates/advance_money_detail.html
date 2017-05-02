@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="order_description">
+                <h2 align="center">Предоплата для Договора №{{ object.order.order_num }}</h2>
+                <p>Дата: {{ object.date }}</p>
+                <p>Сумма: {{ object.advance_money }}</p>
+            </div>
+            <hr>
+            <a class="btn btn-warning btn-lg" href="{% url 'advance_money_edit' pk=object.id %}">Изменить</a>
+            <hr>
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-sm-6">
+            <h2>Извлечь позиции товаров договора</h2>
+            <div class="col-sm-6 input-group">
+                <input id="order_num" type="text" class="form-control" placeholder="Номер договора">
+                  <span class="input-group-btn">
+                    <button id="get_orderitems_btn" class="btn btn-warning" type="button">Извлечь</button>
+                  </span>
+            </div>
+            <p>Будут отображаться только не доставленные ранее позиции.</p>
+            <div id="order_items_delivery">
+
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <h2 align="center">Доставка №<span id="delivery_num">{{ delivery.delivery_num }}</span></h2>
+            <div class="product_errors"></div>
+            <div id="in_delivery">
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th>Товар</th>
+                        <th>Кол-во</th>
+                        <th>Сумма со скидкой</th>
+                        <th>Скидка</th>
+                        <th>Договор</th>
+                        <th>Доставка</th>
+                    </tr>
+                    </thead>
+                    <tbody id="order_items_list">
+                    {% if order_items %}
+                        {% for oi in order_items %}
+                            {% include 'snippets/order_item_table_row_delivery.html' with orderitem=oi %}
+                        {% endfor %}
+                    {% endif %}
+                    </tbody>
+                </table>
+                <hr>
+                <a class="btn btn-warning btn-lg" href="{% url 'delivery_detail' pk=delivery.id %}">Готово</a>
+            </div>
+        </div>
+
+    </div>
+{% endblock %}

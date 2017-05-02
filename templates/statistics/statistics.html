@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+{% load humanize %}
+
+{% block content %}
+    <style>
+        body {
+            background-color: #F5F5F5;
+        }
+    </style>
+    <div class="row" style="background-color: #F5F5F5; padding: 20px 0">
+        <div class="col-sm-12" align="center">
+            <div id="accordion" role="tablist" aria-multiselectable="true">
+                <div class="panel panel-default">
+                    <div class="panel-heading" role="tab" id="headingOne">
+                        <h4 class="panel-title">
+                            <a class="collapsed" data-toggle="collapse" data-parent="#accordion"
+                               href="#collapseOne"
+                               aria-expanded="true"
+                               aria-controls="collapseOne">
+                                <h3>Общая сумма предоплат в кассе без реализации:
+                                    <label>{{ am_total | intcomma }}</label> рублей</h3>
+                            </a>
+                        </h4>
+                    </div>
+                    <div id="collapseOne" class="panel-collapse collapse" role="tabpanel"
+                         aria-labelledby="headingOne">
+                        <table class="table">
+                            <thead>
+                            <tr>
+                                <th></th>
+                                <th>Договор</th>
+                                <th>Сумма</th>
+                                <th>Дата внесения предоплаты</th>
+                                <th>Кредит</th>
+                                <th>Полностью оплачен</th>
+                                <th>Полностью доставлен</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for am in am_qs_all %}
+                                <tr>
+                                    <td>{{ forloop.counter }}.</td>
+                                    <td><a href="{{ am.order.get_absolute_url }}">{{ am.order }}</a></td>
+                                    {% if am.order.full_money_date %}
+                                        <td>{{ am.order.total | intcomma }} руб.</td>
+                                    {% else %}
+                                        <td>{{ am.advance_money | intcomma }} руб.</td>
+                                    {% endif %}
+                                    <td>{{ am.date }}</td>
+                                    {% if am.order.kredit %}
+                                        <td>Да</td>
+                                    {% else %}
+                                        <td>Нет</td>
+                                    {% endif %}
+                                    {% if am.order.full_money_date %}
+                                        <td>Да</td>
+                                    {% else %}
+                                        <td>Нет</td>
+                                    {% endif %}
+                                    {% if am.order.delivered %}
+                                        <td>Да</td>
+                                    {% else %}
+                                        <td>Нет</td>
+                                    {% endif %}
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row" style="background-color: rgba(42, 171, 210, 0.61); padding: 20px 0">
+        <div class="col-sm-12" align="center">
+            <h1>Статистика за периоды:</h1>
+        </div>
+        <div class="col-sm-4" align="center">
+            <a href="{% url 'archive_day' year=now.year month=now.month day=now.day %}"
+               class="btn btn-lg btn-default">Текущий
+                день</a>
+        </div>
+        <div class="col-sm-4" align="center">
+            <a href="{% url 'archive_week' year=now.year week=now|date:"W" %}" class="btn btn-lg btn-default">Текущая
+                неделя</a>
+        </div>
+        <div class="col-sm-4" align="center">
+            <a href="{% url 'archive_month_numeric' year=now.year month=now.month %}"
+               class="btn btn-lg btn-default">Текущий
+                месяц</a>
+        </div>
+    </div>
+    <div class="row" style="background-color: rgba(210, 146, 95, 0.61); padding: 20px 0">
+        <div class="col-sm-12" align="center">
+            <h1>Статистика по персоналу:</h1>
+        </div>
+        <div class="col-sm-3" align="center">
+            <h2>Менеджеры</h2>
+            {% for saler in salers %}
+                <p>
+                    <a href="{% url 'worker_account' year=now.year month=now.month user_id=saler.id %}">{{ saler.fullname }}</a>
+                </p>
+            {% endfor %}
+        </div>
+        <div class="col-sm-3" align="center">
+            <h2>Грузчики</h2>
+            {% for lifter in lifters %}
+                <p>
+                    <a href="{% url 'worker_account' year=now.year month=now.month user_id=lifter.id %}">{{ lifter.fullname }}</a>
+                </p>
+            {% endfor %}
+        </div>
+        <div class="col-sm-3" align="center">
+            <h2>Водители</h2>
+            {% for driver in drivers %}
+                <p>
+                    <a href="{% url 'worker_account' year=now.year month=now.month user_id=driver.id %}">{{ driver.fullname }}</a>
+                </p>
+            {% endfor %}
+        </div>
+        <div class="col-sm-3" align="center">
+            <h2>Администраторы</h2>
+            {% for admin in admins %}
+                <p>
+                    <a href="{% url 'worker_account' year=now.year month=now.month user_id=admin.id %}">{{ admin.fullname }}</a>
+                </p>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}

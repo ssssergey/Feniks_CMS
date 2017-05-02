@@ -1,0 +1,9 @@
+Django==1.9.6
+django-crispy-forms==1.6.0
+django-filter==0.15.3
+django-uuslug==1.1.8
+djangorestframework==3.4.6
+humanize==0.5.1
+psycopg2==2.6.2
+python-slugify==1.2.1
+Unidecode==0.4.19

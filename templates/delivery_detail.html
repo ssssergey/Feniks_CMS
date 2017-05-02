@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="delivery_description">
+                <h2 align="center"><i class="fa fa-lg fa-truck" aria-hidden="true"></i>&nbsp;Доставка
+                    №{{ delivery.delivery_num }}</h2>
+                <p>Дата доставки: {{ delivery.date }}</p>
+                <p>Адрес доставки: {{ delivery.addres }}</p>
+                <p>Количество этажей: {{ delivery.stores }}</p>
+                <p>Водитель: {{ delivery.driver }}</p>
+                <p>Самовывоз: {{ delivery.selfdrive|yesno:"Да,Нет" }}</p>
+                {% if delivery.lifter.all %}
+                    <h3>Грузчики:</h3>
+                    <ul>
+                        {% for lifter in delivery.lifter.all %}
+                            <li>{{ lifter }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+
+                {% if delivery.orderitem_set.all %}
+                    <h3>Позиции договора (всего - {{ delivery.orderitem_set.all|length }}):</h3>
+                    <table class="table">
+                        <thead>
+                        <tr>
+                            <th>№</th>
+                            <th>Товар</th>
+                            <th>Кол-во</th>
+                            <th>Цена</th>
+                            <th>Сумма без скидки</th>
+                            <th>Скидка</th>
+                            <th>Сумма со скидкой</th>
+                            <th>Наличие</th>
+                            <th>Заказан у поставщика</th>
+                            <th>Получен от поставщика</th>
+                            <th>Доставлен покупателю</th>
+                            <th>Договор</th>
+                        </tr>
+                        </thead>
+                        <tbody id="order_items_list">
+                        {% for orderitem in delivery.orderitem_set.all %}
+                            <tr>
+                                <td>{{ forloop.counter }}</td>
+                                {% include 'snippets/order_item_table_row_full.html' with orderitem=orderitem %}
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                {% endif %}
+            </div>
+            <hr>
+            {% if request.user.role_saler or request.user.role_admin or request.user.role_accountant or request.user.is_superuser %}
+                <a class="btn btn-warning btn-lg" href="{% url 'delivery_edit' pk=delivery.id %}">Изменить</a>
+            {% endif %}
+            <hr>
+        </div>
+    </div>
+{% endblock %}

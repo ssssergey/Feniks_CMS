@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-sm-12">
+            <h1>Неделя {{ week|date:'W' }} ({{ week|date:'d.m.y' }}-{{ next_week|date:'d.m.y' }})</h1>
+            {% include 'snippets/table_of_orders.html' with orders=object_list %}
+
+        </div>
+    </div>
+{% endblock %}
+
+{% block footer %}
+    <p>
+        {% if previous_week %}
+            <a href="{% url 'archive_week' year=previous_week.year week=previous_week|date:'W' %}">
+                Предыдущая неделя </a>
+        {% endif %}
+        {% if previous_week and next_week %}-|-{% endif %}
+        {% if next_week %}
+            <a href="{% url 'archive_week' year=next_week.year week=next_week|date:'W' %}">
+                Следующий неделя
+            </a>
+        {% endif %}
+    </p>
+{% endblock %}

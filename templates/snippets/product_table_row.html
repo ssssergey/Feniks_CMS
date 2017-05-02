@@ -1,0 +1,29 @@
+<tr>
+    <td class="product_name">{{ product.name }}</td>
+    <td>
+        <form class="form-horizontal">
+            {% csrf_token %}
+            <div class="row">
+                <div class="col-sm-6">
+                    <label for="price">Цена</label>
+                    <input type="number" name="price"
+                           size="4" class="price" maxlength="4" required/><br>
+                    <label for="price">Скидка</label>
+                    <input type="number" name="discount"
+                           size="6" class="discount" maxlength="8"/><br>
+                    <label for="quantity">Кол-во</label>
+                    <input type="number" name="quantity" value="1"
+                           size="2" class="quantity " maxlength="5" required/><br>
+                    <label for="quantity">В наличии</label>
+                    <input type="checkbox" name="present" value="true"
+                           class="present " /><br>
+                    <input type="hidden" name="product_id" class="product_id" value="{{ product.id }}"/>
+                </div>
+                <div class="col-sm-6">
+                    <a class="submit_add_to_order" type="submit" href="#">Добавить в заказ <i
+                            class="fa fa-arrow-right fa-lg" aria-hidden="true"></i></a>
+                </div>
+            </div>
+        </form>
+    </td>
+</tr>
