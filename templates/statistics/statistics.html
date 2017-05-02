@@ -13,10 +13,12 @@
                 <div class="panel panel-default">
                     <div class="panel-heading" role="tab" id="headingOne">
                         <h4 class="panel-title">
-                            <a class="collapsed" data-toggle="collapse" data-parent="#accordion" href="#collapseOne"
+                            <a class="collapsed" data-toggle="collapse" data-parent="#accordion"
+                               href="#collapseOne"
                                aria-expanded="true"
                                aria-controls="collapseOne">
-                                <h3>Общая сумма задатков в кассе без реализации: <label>{{ am_total | intcomma }}</label> рублей</h3>
+                                <h3>Общая сумма предоплат в кассе без реализации:
+                                    <label>{{ am_total | intcomma }}</label> рублей</h3>
                             </a>
                         </h4>
                     </div>
@@ -28,16 +30,38 @@
                                 <th></th>
                                 <th>Договор</th>
                                 <th>Сумма</th>
-                                <th>Дата</th>
+                                <th>Дата внесения предоплаты</th>
+                                <th>Кредит</th>
+                                <th>Полностью оплачен</th>
+                                <th>Полностью доставлен</th>
                             </tr>
                             </thead>
                             <tbody>
                             {% for am in am_qs_all %}
                                 <tr>
                                     <td>{{ forloop.counter }}.</td>
-                                    <td>{{ am.order }}</td>
-                                    <td>{{ am.advance_money | intcomma }} руб.</td>
+                                    <td><a href="{{ am.order.get_absolute_url }}">{{ am.order }}</a></td>
+                                    {% if am.order.full_money_date %}
+                                        <td>{{ am.order.total | intcomma }} руб.</td>
+                                    {% else %}
+                                        <td>{{ am.advance_money | intcomma }} руб.</td>
+                                    {% endif %}
                                     <td>{{ am.date }}</td>
+                                    {% if am.order.kredit %}
+                                        <td>Да</td>
+                                    {% else %}
+                                        <td>Нет</td>
+                                    {% endif %}
+                                    {% if am.order.full_money_date %}
+                                        <td>Да</td>
+                                    {% else %}
+                                        <td>Нет</td>
+                                    {% endif %}
+                                    {% if am.order.delivered %}
+                                        <td>Да</td>
+                                    {% else %}
+                                        <td>Нет</td>
+                                    {% endif %}
                                 </tr>
                             {% endfor %}
                             </tbody>
@@ -52,7 +76,8 @@
             <h1>Статистика за периоды:</h1>
         </div>
         <div class="col-sm-4" align="center">
-            <a href="{% url 'archive_day' year=now.year month=now.month day=now.day %}" class="btn btn-lg btn-default">Текущий
+            <a href="{% url 'archive_day' year=now.year month=now.month day=now.day %}"
+               class="btn btn-lg btn-default">Текущий
                 день</a>
         </div>
         <div class="col-sm-4" align="center">
@@ -60,7 +85,8 @@
                 неделя</a>
         </div>
         <div class="col-sm-4" align="center">
-            <a href="{% url 'archive_month_numeric' year=now.year month=now.month %}" class="btn btn-lg btn-default">Текущий
+            <a href="{% url 'archive_month_numeric' year=now.year month=now.month %}"
+               class="btn btn-lg btn-default">Текущий
                 месяц</a>
         </div>
     </div>

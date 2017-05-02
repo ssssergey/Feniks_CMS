@@ -1,0 +1,196 @@
+<div class="row" ng-controller="OrdersCtrl" ng-init="initialize('Ready')">
+    <style>
+        .calendars {
+            text-align: center;
+            display:inline-block;
+        }
+    </style>
+    <form class="form-inline" name="SalerForm" novalidate ng-submit="submit()">
+        <div class="row">
+            <div class="col-sm-12">
+                <label for="singleSelect"> Выберите работника: </label><br>
+                <select name="saler" ng-model="user"
+                        ng-options="user.id as user.fullname for user in users">
+                </select>
+            </div>
+        </div>
+        <div class="row calendars">
+            <div class="col-sm-4 calendars">
+                <h4 class="calendars">Дата начала периода</h4>
+                <div class="calendars">
+                    <div uib-datepicker ng-model="date_from" datepicker-options="options" class="well well-sm">
+                        <p style="color: red"><strong>с [[date_from | date:'shortDate' ]]</strong></p>
+                    </div>
+                    <p style="color: red"><strong>с [[date_from | date:'shortDate' ]]</strong></p>
+                    <button type="button" class="btn btn-sm btn-danger" ng-click="clear_from()">Очистить
+                    </button>
+                </div>
+
+            </div>
+            <div class="col-sm-4 calendars">
+                <h4 class="calendars">Дата окончания периода</h4>
+                <div class="calendars">
+                    <div uib-datepicker ng-model="date_to" datepicker-options="options" class="well well-sm"></div>
+                    <p style="color: red"><strong>по [[date_to | date:'shortDate' ]]</strong></p>
+                    <button type="button" class="btn btn-sm btn-danger" ng-click="clear_to()">Очистить
+                    </button>
+                </div>
+            </div>
+            <div class="col-sm-4">
+                <input class="btn btn-lg btn-primary" type="submit" value="Показать">
+                <div><input type="checkbox" name="item" value="new" ng-model="checked"/>Показывать сборку <br/></div>
+            </div>
+        </div>
+    </form>
+    <br>
+
+    <h3 style="background-color: #ffb960; text-align: center">[[ error_1 ]]</h3>
+
+
+    <div class="row" ng-show="checked && show_assembler" style="background-color: lightgray;">
+        <div class="col-sm-12">
+            <h2>ОБЩИЙ ПОДСЧЕТ ПО СБОРКЕ ЗА УКАЗАННЫЙ ПЕРИОД. НЕ ПРИВЯЗАН К ТЕКУЩЕМУ РАБОТНИКУ</h2>
+            <h3>Количество сборок: [[ count_assemblies ]]</h3>
+            <h3>Общая сумма за сборку: [[ total_sum_for_assemblers | currency:"руб.":0 ]]</h3>
+            <h4>- из них по скидке на сборку: [[ total_sum_with_discount | currency:"руб.":0 ]]</h4>
+            <button ng-click="toggle_assembler = !toggle_assembler">Показать</button>
+            <table class="table table-responsive table-striped" ng-show="toggle_assembler">
+                <thead>
+                <tr>
+                    <th></th>
+                    <th>Номер доставки</th>
+                    <th>Дата</th>
+                    <th>Адрес</th>
+                    <th>Сумма за сборку</th>
+                    <th>Скидка на сборку</th>
+                </tr>
+                </thead>
+                <tbody id="product_list">
+                <tr ng-repeat="delivery in assemblies | filter: query">
+                    <td></td>
+                    <td><a href="/delivery_detail/[[delivery.id]]" target="_blank">Доставка №
+                        [[delivery.delivery_num]]</a></td>
+                    <td>[[delivery.date| date:'shortDate']]</td>
+                    <td>[[delivery.addres]]</td>
+                    <td>[[delivery.price_assembly| currency:"руб.":0]]</td>
+                    <td>[[true == delivery.discount ? 'Да' : 'Нет']]</td>
+                </tr>
+                </tbody>
+            </table>
+            <div class="errors"></div>
+        </div>
+    </div>
+
+    <div class="row" ng-if="show_manager" style="background-color: rgba(211, 211, 211, 0.70);">
+        <div class="col-sm-12">
+            <h2>1. Менеджер</h2>
+            <h3>Общая сумма продаж по договорам: [[ total_sum_for_salers | currency:"руб.":0 ]]</h3>
+            <h3>Общая сумма продаж на менеджера: [[ total_sum_per_saler | currency:"руб.":0 ]]</h3>
+            <button ng-click="toggle_manager = !toggle_manager">Показать</button>
+            <table class="table table-responsive table-striped" ng-show="toggle_manager">
+                <thead>
+                <tr>
+                    <th></th>
+                    <th>Номер договора</th>
+                    <th>Дата продажи</th>
+                    <th>Кол-во позиций</th>
+                    <th>Сумма за весь договор</th>
+                    <th>Сумма на одного менеджера</th>
+                    <th>В кредит</th>
+                    <th>Дата полной оплаты</th>
+                    <th>Менеджер 1</th>
+                    <th>Менеджер 2</th>
+                    <th>Все доставлено</th>
+                </tr>
+                </thead>
+                <tbody id="product_list">
+                <tr ng-repeat="order in orders | filter: query">
+                    <td></td>
+                    <td><a href="/order_detail/[[order.id]]" target="_blank">Договор №
+                        [[order.order_num]]</a></td>
+                    <td>[[order.sale_date| date:'shortDate']]</td>
+                    <td>[[order.quantity]]</td>
+                    <td>[[order.total| currency:"руб.":0]]</td>
+                    <td>[[order.total_per_saler| currency:"руб.":0]]</td>
+                    <td>[[true == order.kredit ? 'Да' : 'Нет']]</td>
+                    <td>[[order.full_money_date| date:'shortDate']]</td>
+                    <td>[[order.saler]]</td>
+                    <td>[[order.saler2]]</td>
+                    <td>[[true == order.delivered ? 'Да' : 'Нет']]</td>
+                </tr>
+                </tbody>
+            </table>
+            <div class="errors"></div>
+        </div>
+    </div>
+
+    <div class="row" ng-if="show_lifter" style="background-color: rgba(211, 211, 211, 0.40);">
+        <div class="col-sm-12">
+            <h2>2. Грузчик</h2>
+            <h3>Количество заносов: [[ count_deliveries ]]</h3>
+            <h3>Общая сумма за заносы: [[ total_sum_for_lifers | currency:"руб.":0 ]]</h3>
+            <h3>Сумма на грузчика: [[ total_sum_per_lifter | currency:"руб.":0 ]]</h3>
+            <button ng-click="toggle_lifter = !toggle_lifter">Показать</button>
+            <table class="table table-responsive table-striped" ng-show="toggle_lifter">
+                <thead>
+                <tr>
+                    <th></th>
+                    <th>Номер доставки</th>
+                    <th>Дата</th>
+                    <th>Адрес</th>
+                    <th>Сумма общая</th>
+                    <th>Сумма на одного грузчика</th>
+                </tr>
+                </thead>
+                <tbody id="product_list">
+                <tr ng-repeat="delivery in deliveries | filter: query">
+                    <td></td>
+                    <td><a href="/delivery_detail/[[delivery.id]]" target="_blank">Доставка №
+                        [[delivery.delivery_num]]</a></td>
+                    <td>[[delivery.date| date:'shortDate']]</td>
+                    <td>[[delivery.addres]]</td>
+                    <td>[[delivery.price| currency:"руб.":0]]</td>
+                    <td>[[delivery.price_per_lifter| currency:"руб.":0]]</td>
+                </tr>
+                </tbody>
+            </table>
+            <div class="errors"></div>
+        </div>
+    </div>
+
+    <div class="row" ng-if="show_driver" style="background-color: rgba(211, 211, 211, 0.10);">
+        <div class="col-sm-12">
+            <h2>3. Водитель</h2>
+            <h3>[[ error_3 ]]</h3>
+            <h3>Количество полных дней: [[ full_days ]]</h3>
+            <h3>Количество неполных дней: [[ not_full_days ]]</h3>
+            <h3>Общее кол-во доставок сверх суточной нормы: [[ extra_deliveries ]]</h3>
+            <button ng-click="toggle_driver = !toggle_driver">Показать</button>
+            <table class="table table-responsive table-striped" ng-show="toggle_driver">
+                <thead>
+                <tr>
+                    <th>Дата</th>
+                    <th>Полный день</th>
+                    <th>Общее кол-во доставок</th>
+                    <th>Доставки сверх нормы</th>
+                    <th>Доставки</th>
+                </tr>
+                </thead>
+                <tbody id="product_list">
+                <tr ng-repeat="date in dates | filter: query">
+                    <td>[[date.date]]</td>
+                    <td>[[true == date.full ? 'Да' : 'Нет']]</td>
+                    <td>[[date.deliveries_count]]</td>
+                    <td>[[date.extra_count]]</td>
+                    <td ng-repeat="delivery in date.deliveries">
+                        <a href="/delivery_detail/[[delivery.id]]" target="_blank">Доставка
+                            №[[delivery.delivery_num]]</a>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+            <div class="errors"></div>
+        </div>
+    </div>
+
+</div>

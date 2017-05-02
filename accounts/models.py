@@ -16,6 +16,7 @@ class UserProfile(AbstractUser):
     class Meta:
         verbose_name = u'Персонал'
         verbose_name_plural = u'Персонал'
+        ordering = ('last_name',)
 
     @property
     def fullname(self):

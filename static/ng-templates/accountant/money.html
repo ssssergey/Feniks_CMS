@@ -1,0 +1,39 @@
+<div class="row" ng-controller="MoneyCtrl" ng-init="initialize('Ready')">
+    <h1 style="background-color: #b94c61; color: white; text-align: center">[[preload]]</h1>
+    <p>* без кредитов</p>
+    <p>** если у договора указана дата полной оплаты, используется сумма договора вместо всех предоплат по этому договору</p>
+    <h1>Общая сумма в кассе без реализации: [[ total_sum | currency:"руб.":0 ]]</h1>
+    <h2> - полностью оплачено, но не доставлено: [[ total_sum_paid_not_delivered | currency:"руб.":0 ]]</h2>
+    <h2> - неполностью оплачено и не доставлено (частичные предоплаты): [[ total_sum_partialy_paid | currency:"руб.":0 ]]</h2>
+    <table class="table table-responsive">
+        <thead>
+        <tr>
+            <th></th>
+            <th>Номер договора</th>
+            <th>Дата продажи</th>
+            <th>Сумма за весь договор</th>
+            <th>Предоплаты</th>
+            <th>Дата полной оплаты</th>
+            <th>Менеджер 1</th>
+            <th>Менеджер 2</th>
+            <th>В кредит</th>
+            <th>Все доставлено</th>
+        </tr>
+        </thead>
+        <tbody id="product_list">
+        <tr ng-repeat="order in orders | filter: query">
+            <td></td>
+            <td><a href="/order_detail/[[order.id]]" target="_blank">Договор №
+                [[order.order_num]]</a></td>
+            <td>[[order.sale_date| date:'shortDate']]</td>
+            <td>[[order.total|currency:"руб.":0]]</td>
+            <td>[[order.full_money_date ? '<---' : (order.total_advance_money|currency:"руб.":0)]]</td>
+            <td>[[order.full_money_date| date:'shortDate']]</td>
+            <td>[[order.saler]]</td>
+            <td>[[order.saler2]]</td>
+            <td>[[true == order.kredit ? 'Да' : 'Нет']]</td>
+            <td>[[true == order.delivered ? 'Да' : 'Нет']]</td>
+        </tr>
+        </tbody>
+    </table>
+</div>

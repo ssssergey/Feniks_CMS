@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 import os
 import socket
 from secret import *
@@ -14,7 +13,10 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = secret_key
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+if socket.gethostname() == 'asus-UX32LN':
+    DEBUG = True
+else:
+    DEBUG = False
 
 ALLOWED_HOSTS = ["*"]
 
@@ -22,6 +24,15 @@ AUTH_USER_MODEL = 'accounts.UserProfile'
 
 LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = '/'
+
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_HOST_USER = email_host_user
+EMAIL_HOST_PASSWORD = email_host_password
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+SERVER_EMAIL = EMAIL_HOST_USER
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+EMAIL_SUBJECT_PREFIX = '[FeniksCMS] '
 
 # Application definition
 
@@ -77,7 +88,7 @@ WSGI_APPLICATION = 'Feniks_CMS.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'feniks_cms',
+        'NAME': 'feniks_cms_utf8',
         'USER': pg_username,
         'PASSWORD': pg_password,
         'HOST': 'localhost',
@@ -106,7 +117,10 @@ AUTH_PASSWORD_VALIDATORS = [
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',
-    )
+    ),
+    'DEFAULT_FILTER_BACKENDS': (
+        'django_filters.rest_framework.DjangoFilterBackend',
+    ),
 }
 
 # Internationalization

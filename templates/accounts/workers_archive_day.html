@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% load humanize %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-sm-12">
+            <h1 align="right">{{ request.user.fullname }}</h1>
+            <hr>
+            <h1>{{ day }}</h1>
+            {% if object_list %}
+                <hr>
+                <table class="table table-striped table-responsive">
+                    <thead>
+                    <tr>
+                        <th></th>
+                        <th>Номер договора</th>
+                        <th>Дата продажи</th>
+                        <th>Кол-во позиций</th>
+                        <th>Сумма за весь договор</th>
+                        <th>Сумма на одного менеджера</th>
+                        <th>Стоимость доставки</th>
+                        <th>Скидка на доставку</th>
+                        <th>Стоимость заноса</th>
+                        <th>Скидка на занос</th>
+                        <th>Стоимость сборки</th>
+                        <th>Скидка на сборку</th>
+                        <th>Кредит</th>
+                        <th>Менеджер 1</th>
+                        <th>Менеджер 2</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for order in object_list %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td><a href="{{ order.get_absolute_url }}" target="_blank">Договор
+                                № {{ order.order_num }}</a></td>
+                            <td>{{ order.sale_date }}</td>
+                            <td>
+                                {% if order.quantity == 0 %}
+                                    <span style="background-color: red; color: white; padding: 5px">{{ order.quantity }}</span>
+                                {% else %}
+                                    <span>{{ order.quantity }}</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ order.total | intcomma}}</td>
+                            <td>{{ order.total_per_saler | intcomma}}</td>
+                            <td>{{ order.delivery_money| intcomma}}</td>
+                            <td>{{ order.delivery_discount|yesno:"Да,Нет" }}</td>
+                            <td>{{ order.lifting_money| intcomma}}</td>
+                            <td>{{ order.lifting_discount|yesno:"Да,Нет" }}</td>
+                            <td>{{ order.assembly_money| intcomma}}</td>
+                            <td>{{ order.assembly_discount|yesno:"Да,Нет" }}</td>
+                            <td>{{ order.kredit|yesno:"Да,Нет" }}</td>
+                            <td>{{ order.saler }}</td>
+                            <td>
+                                {% if order.saler2 %}
+                                    {{ order.saler2 }}
+                                {% else %}
+                                    <span>-</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td>Пусто.</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+                <h2>Итого: {{ total|intcomma }} руб.</h2>
+                <hr>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}
+
+{% block footer %}
+    <p>
+        {% if previous_day %}
+            <a href="{% url 'worker_day' year=previous_day.year month=previous_day.month day=previous_day.day user_id=request.user.id %}">
+                Предыдущий день: {{ previous_day }}
+            </a>
+        {% endif %}
+        {% if previous_day and next_day %}-|-{% endif %}
+        {% if next_day %}
+            <a href="{% url 'worker_day' year=next_day.year month=next_day.month day=next_day.day user_id=request.user.id %}">
+                Следующий день: {{ next_day }}
+            </a>
+        {% endif %}
+    </p>
+{% endblock %}

@@ -1,8 +1,8 @@
 <td>{{ orderitem.product.name }}</td>
 <td>{{ orderitem.quantity }}</td>
 <td>{{ orderitem.price }}</td>
-<td>{{ orderitem.discount }}</td>
 <td>{{ orderitem.total }}</td>
+<td>{{ orderitem.discount }}</td>
 <td>{{ orderitem.total_with_discount }}</td>
 {% if orderitem.present %}
     <td class="done">В наличии</td>
@@ -32,3 +32,4 @@
 {% else %}
     <td class="not_done">Нет</td>
 {% endif %}
+<td><a href="{{ orderitem.order.get_absolute_url }}" target="_blank">№ {{ orderitem.order.order_num }}</a></td>

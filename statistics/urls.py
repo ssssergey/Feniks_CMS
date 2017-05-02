@@ -15,4 +15,5 @@ urlpatterns = [
     url(r'^(?P<year>[0-9]{4})/(?P<month>[0-9]+)/(?P<day>[0-9]+)/$',
         OrderDayArchiveView.as_view(month_format='%m'),
         name="archive_day"),
+    url(r'^accountant$', accountant, name='accountant'),
 ]

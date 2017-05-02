@@ -1,16 +1,21 @@
 {% extends "base.html" %}
+{% load humanize %}
 
 {% block content %}
     <div class="row">
         <div class="col-sm-12">
             <div class="order_description">
-                <h2 align="center">Договор №{{ order.order_num }}</h2>
+                <h2 align="center"><i class="fa fa-lg fa-file-text-o" aria-hidden="true"></i>&nbsp;Договор
+                    №{{ order.order_num }}</h2>
                 <p>Дата продажи: {{ order.sale_date }}</p>
-                <p>Продавец: {{ order.saler.fullname }}</p>
+                <p>Менеджер: {{ order.saler.fullname }}</p>
+                {% if order.saler2 %}
+                    <p>Второй менеджер: {{ order.saler2.fullname }}</p>
+                {% endif %}
                 <p>Покупатель: {{ order.customer_name }}</p>
                 <p>Адрес покупателя: {{ order.customer_addres }}</p>
                 <p>Телефон покупателя: {{ order.customer_phone }}</p>
-                <p>Сумма продажи: {{ order.total }} рублей</p>
+
                 {% if order.kredit %}
                     <p class="done">Оплачено кредитом</p>
                 {% endif %}
@@ -24,24 +29,14 @@
                 {% else %}
                     <p class="not_done">Администратор не проверил</p>
                 {% endif %}
-                {% if order.accountant_check %}
-                    <p class="done">Бухгалтер проверил</p>
-                {% else %}
-                    <p class="not_done">Бухгалтер не проверил</p>
-                {% endif %}
-                {% if order.delivery_money %}
-                    <p>Стоимость доставки: {{ order.delivery_money }} рублей</p>
-                {% else %}
-                    <p>Стоимость доставки: нет.</p>
-                {% endif %}
-                {% if order.advancemoney_set.all %}
-                    <h3>Задатки: {{ order.total_advance_money }} рублей</h3>
+                {% if order.advancemoney_set.all and not order.fulfilled %}
+                    <h3>Предоплаты: {{ order.total_advance_money }} рублей</h3>
                     <table class="table">
                         <thead>
                         <tr>
                             <th>№</th>
-                            <th>Дата получения задатка</th>
-                            <th>Сумма задатка</th>
+                            <th>Дата получения предоплаты</th>
+                            <th>Сумма предоплаты</th>
                             <th></th>
                         </tr>
                         </thead>
@@ -56,8 +51,6 @@
                         {% endfor %}
                         </tbody>
                     </table>
-                {% else %}
-                    <h3>Задатков нет.</h3>
                 {% endif %}
 
                 {% if order.orderitem_set.all %}
@@ -68,14 +61,15 @@
                             <th>№</th>
                             <th>Товар</th>
                             <th>Кол-во</th>
-                            <th>Цена</th>
-                            <th>Скидка</th>
+                            <th>Цена товара</th>
                             <th>Сумма без скидки</th>
-                            <th>Сумма со скидкой</th>
+                            <th>Скидка на товар</th>
+                            <th>Сумма со скидкой на товар</th>
                             <th>Наличие</th>
                             <th>Заказан у поставщика</th>
                             <th>Получен от поставщика</th>
                             <th>Доставлен покупателю</th>
+                            <th>Договор</th>
                         </tr>
                         </thead>
                         <tbody id="order_items_list">
@@ -88,16 +82,29 @@
                         </tbody>
                     </table>
                 {% endif %}
+                <p>Сумма (промежуточная) с товарными скидками: {{ order.total_subtotal | intcomma }} руб.</p>
+                {% if order.delivery_money and order.delivery_discount %}
+                    <p>- Cкидка на доставку: {{ order.delivery_money }} руб.</p>
+                {% endif %}
+                {% if order.lifting_money and order.lifting_discount %}
+                    <p>- Cкидка на занос: {{ order.lifting_money }} руб.</p>
+                {% endif %}
+                {% if order.assembly_money and order.assembly_discount %}
+                    <p>- Cкидка на сборку: {{ order.assembly_money }} руб.</p>
+                {% endif %}
+                <p>Сумма с вычетом всех скидок: {{ order.total | intcomma }} руб.</p>
             </div>
             <hr>
-            <a class="btn btn-warning btn-lg" href="{% url 'order_edit' pk=order.id %}">Изменить</a>
+            {% if request.user.role_saler or request.user.role_admin or request.user.role_accountant or request.user.is_superuser %}
+                <a class="btn btn-warning btn-lg" href="{% url 'order_edit' pk=order.id %}">Изменить</a>
+            {% endif %}
             {% if request.user.role_admin %}
                 <a class="btn btn-info btn-lg pull-right" href="{% url 'admin_check' order_id=order.id %}">Проверено
                     админом</a>
             {% endif %}
             {% if request.user.role_accountant %}
-                <a class="btn btn-info btn-lg pull-right" href="{% url 'accountant_check' order_id=order.id %}">Проверено
-                    бухгалтером</a>
+                <a class="btn btn-warning btn-lg" href="{% url 'order_delete' order_id=order.id %}"
+                   onclick="return confirm('Вы уверены?');">Удалить</a>
             {% endif %}
             <hr>
         </div>
