@@ -5,7 +5,8 @@
     {% if request.user.role_saler or request.user.role_accountant or request.user.is_superuser %}
         <div class="row">
             <div class="col-sm-4 col-sm-offset-4" align="center">
-                <a href="{% url 'order_create' %}" class="btn btn-lg btn-primary btn_margin">&nbsp;Новый договор</a>
+                <a href="{% url 'order_create' %}" class="btn btn-lg btn-primary btn_margin"><i
+                        class="fa fa-lg fa-file-text-o" aria-hidden="true"></i>&nbsp;Новый договор</a>
                 <form method="get" action="{% url 'find_order' %}">
                     <div class="input-group">
                         <input name="order_num" type="text" class="form-control" placeholder="Номер договора">

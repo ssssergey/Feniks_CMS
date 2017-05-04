@@ -12,7 +12,7 @@ urlpatterns = [
     url(r'^', include('statistics.urls')),
     url(r'^$', index, name='home'),
     url(r'^api/', include('managers.api.urls', namespace="api")),
-    url(r'^api/', include('statistics.api_accountant.urls', namespace="api")),
+    url(r'^api/', include('statistics.api.urls', namespace="api")),
 ]
 
 urlpatterns += [

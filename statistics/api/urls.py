@@ -1,9 +1,9 @@
 from django.conf.urls import url
 # from views import OrderList, OrderDetail, UserDetail, UserList
-from views import OrderViewSet, UserViewSet, SalerViewSet
+from .views import (OrderViewSet, UserViewSet, SalerViewSet, DeliveryLifterViewSet, MoneyExtraViewSet,
+                    DeliveryDriverViewSet, DeliveryAssemblerViewSet)
 from rest_framework import routers
 from rest_framework.urlpatterns import format_suffix_patterns
-
 
 # urlpatterns = format_suffix_patterns([
 #     url(r'^users/$',
@@ -21,8 +21,12 @@ from rest_framework.urlpatterns import format_suffix_patterns
 # ])
 
 router = routers.SimpleRouter()
-router.register(r'orders', OrderViewSet)
+router.register(r'orders-for-salers', OrderViewSet)
+router.register(r'delivery-lifter', DeliveryLifterViewSet)
+router.register(r'delivery-assembler', DeliveryAssemblerViewSet)
+router.register(r'delivery-driver', DeliveryDriverViewSet)
 router.register(r'users', UserViewSet)
 router.register(r'salers', SalerViewSet)
+router.register(r'money-extra', MoneyExtraViewSet)
 
 urlpatterns = router.urls

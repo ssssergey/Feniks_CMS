@@ -50,7 +50,7 @@ buh_app.config(function ($stateProvider, $urlRouterProvider) {
             url: '/',
             views: {
                 'content@': {
-                    templateUrl: 'static/ng-templates/accountant/workers.html',
+                    templateUrl: 'static/ng-views/accountant/workers.html',
                     controller: 'OrdersCtrl'
                 }
             }
@@ -59,7 +59,7 @@ buh_app.config(function ($stateProvider, $urlRouterProvider) {
             url: 'money',
             views: {
                 'content@': {
-                    templateUrl: 'static/ng-templates/accountant/money.html',
+                    templateUrl: 'static/ng-views/accountant/money.html',
                     controller: 'MoneyCtrl'
                 }
             }
