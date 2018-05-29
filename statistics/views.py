@@ -53,7 +53,8 @@ class OrderMonthArchiveView(MonthArchiveView):
         context['total'] = total
 
         all_qs = self.get_queryset()
-        realiz_cashin_qs = all_qs.filter(full_money_date__month=self.get_month())
+        realiz_cashin_qs = all_qs.filter(full_money_date__month=self.get_month()).filter(
+            full_money_date__year=self.get_year())
 
         realiz_cashin_total = 0
         for order in realiz_cashin_qs:

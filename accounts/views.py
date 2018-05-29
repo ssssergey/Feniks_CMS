@@ -1,20 +1,11 @@
 # -*- coding: utf-8 -*-
-import time
-
-from django.contrib import messages
-from django.contrib.auth import login, authenticate, logout, get_user_model
-from django.contrib.auth.decorators import login_required, user_passes_test
-from django.shortcuts import render_to_response, get_object_or_404, redirect, \
-    render
-from django.template import RequestContext
-from django.http import Http404
+from django.contrib.auth import get_user_model
+from django.shortcuts import get_object_or_404
 from django.views.generic.dates import MonthArchiveView, DayArchiveView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Q
-from django.utils.decorators import method_decorator
 
-from .forms import UserLoginForm
-from managers.models import Order, OrderItem, AdvanceMoney, Delivery
+from managers.models import Order, OrderItem, Delivery
 
 User = get_user_model()
 
@@ -77,18 +68,9 @@ class WorkerMonthArchiveView(LoginRequiredMixin, MonthArchiveView):
         context['realiz_total'] = realiz_total
         context['realiz_qs'] = realiz_qs
 
-        # am_qs = AdvanceMoney.objects.filter(order__in=qs,
-        #                                     order__saler__id=self.kwargs[
-        #                                         'user_id'],
-        #                                     order__full_money_date__isnull=True)
-        # am_total = 0
-        # for am in am_qs:
-        #     am_total += am.advance_money
-        # context['am_total'] = am_total
-        # context['am_qs'] = am_qs
-
         all_qs = self.get_queryset()
-        realiz_cashin_qs = all_qs.filter(full_money_date__month=self.get_month())
+        realiz_cashin_qs = all_qs.filter(full_money_date__month=self.get_month()).filter(
+            full_money_date__year=self.get_year())
 
         realiz_cashin_total = 0
         for order in realiz_cashin_qs:
@@ -96,19 +78,10 @@ class WorkerMonthArchiveView(LoginRequiredMixin, MonthArchiveView):
         context['realiz_cashin_total'] = realiz_cashin_total
         context['realiz_cashin_qs'] = realiz_cashin_qs
 
-        # am_cashin_qs = AdvanceMoney.objects.filter(
-        #     date__month=self.get_month(),
-        #     order__saler__id=self.kwargs['user_id'],
-        #     order__full_money_date__isnull=True)
-        # am_cashin_total = 0
-        # for am in am_cashin_qs:
-        #     am_cashin_total += am.advance_money
-        # context['am_cashin_total'] = am_cashin_total
-        # context['am_cashin_qs'] = am_cashin_qs
-
         # Lifter
         lifts = Delivery.objects.filter(lifter__id=self.kwargs['user_id'],
-                                        date__month=self.get_month()).prefetch_related('orderitem_set__order')
+                                        date__month=self.get_month()).filter(
+            date__year=self.get_year()).prefetch_related('orderitem_set__order')
         total_per_lifter = 0
         for lift in lifts:
             total_per_lifter += lift.price_per_lifter
@@ -116,12 +89,14 @@ class WorkerMonthArchiveView(LoginRequiredMixin, MonthArchiveView):
         context['total_per_lifter'] = total_per_lifter
 
         # Driver
-        drives = Delivery.objects.filter(driver__id=self.kwargs['user_id'], date__month=self.get_month())
+        drives = Delivery.objects.filter(driver__id=self.kwargs['user_id'], date__month=self.get_month()).filter(
+            date__year=self.get_year())
         context['drives'] = drives
 
         # Admin
         admins = OrderItem.objects.filter(supplier_invoice_date__month=self.get_month(),
-                                          admin_id=self.kwargs['user_id']).select_related('order', 'product')
+                                          admin_id=self.kwargs['user_id']).filter(
+            supplier_invoice_date__year=self.get_year()).select_related('order', 'product')
         context['admins'] = admins
 
         return context
